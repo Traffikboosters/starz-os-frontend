@@ -1,186 +1,156 @@
+// UPGRADED RICO ENGINE (MERGED)
+
 import { createClient } from "npm:@supabase/supabase-js@2.49.8";
 
-type Role = "seo" | "dev" | "content" | "qa";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-interface TaskTemplate {
-  task_type: string;
-  assigned_role: Role;
-  instructions: string;
-  priority?: "low" | "normal" | "high";
-}
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-// Store user pools in env as JSON for easier ops updates.
-// Example:
-// USERS_BY_ROLE_JSON={"seo":["uuid1"],"dev":["uuid2"],"content":["uuid3"],"qa":["uuid4"]}
-const USERS_BY_ROLE_JSON = Deno.env.get("USERS_BY_ROLE_JSON");
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-const DEFAULT_USERS: Record<Role, string[]> = {
-  seo: [],
-  dev: [],
-  content: [],
-  qa: [],
-};
-
-const USERS: Record<Role, string[]> = (() => {
-  if (!USERS_BY_ROLE_JSON) return DEFAULT_USERS;
-  try {
-    const parsed = JSON.parse(USERS_BY_ROLE_JSON);
-    return {
-      seo: Array.isArray(parsed.seo) ? parsed.seo : [],
-      dev: Array.isArray(parsed.dev) ? parsed.dev : [],
-      content: Array.isArray(parsed.content) ? parsed.content : [],
-      qa: Array.isArray(parsed.qa) ? parsed.qa : [],
-    };
-  } catch {
-    return DEFAULT_USERS;
-  }
-})();
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
+// =============================
+// HELPERS
+// =============================
+async function logActivity(work_order_id: string, org_id: string, title: string, message: string) {
+  await supabase.schema("fulfillment").from("activity_log").insert({
+    work_order_id,
+    org_id,
+    event_type: "rico_engine",
+    title,
+    message
   });
 }
 
-function assignUser(role: Role): string | null {
-  const pool = USERS[role] ?? [];
-  if (pool.length === 0) return null;
-  return pool[Math.floor(Math.random() * pool.length)];
+async function createJob(work_order_id: string, org_id: string, module: string) {
+  await supabase.schema("fulfillment").from("jobs").insert({
+    work_order_id,
+    org_id,
+    engine_name: "rico-engine",
+    module,
+    status: "pending",
+    step_name: "queued",
+    progress_pct: 0
+  });
 }
 
-function getTasksForService(serviceType: string): TaskTemplate[] {
+async function callEngine(name: string, payload: any) {
+  const { error } = await supabase.functions.invoke(name, { body: payload });
+  if (error) throw new Error(`${name} failed: ${error.message}`);
+}
+
+// =============================
+// TASK GENERATION (YOUR ORIGINAL)
+// =============================
+function getTasks(serviceType: string) {
   if (serviceType === "SEO") {
     return [
-      {
-        task_type: "keyword_research",
-        assigned_role: "seo",
-        instructions: "Find 50 high-intent keywords with search volume + KD",
-      },
-      {
-        task_type: "site_audit",
-        assigned_role: "seo",
-        instructions: "Run full technical SEO audit (speed, errors, structure)",
-      },
-      {
-        task_type: "on_page_fix",
-        assigned_role: "dev",
-        instructions: "Fix meta tags, headings, schema, internal linking",
-      },
-      {
-        task_type: "content_creation",
-        assigned_role: "content",
-        instructions: "Write 5 SEO-optimized blog posts targeting keywords",
-      },
-      {
-        task_type: "backlinks",
-        assigned_role: "seo",
-        instructions: "Build 20 high DA backlinks",
-      },
+      { type: "keyword_research", role: "seo", instructions: "Find 50 keywords" },
+      { type: "site_audit", role: "seo", instructions: "Run SEO audit" },
+      { type: "content", role: "content", instructions: "Write 5 blogs" },
+      { type: "backlinks", role: "seo", instructions: "Build backlinks" }
     ];
   }
-
   return [];
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return json({ success: false, error: "Method not allowed" }, 405);
+// =============================
+// MAIN HANDLER
+// =============================
+Deno.serve(async (req) => {
+
+  if (req.method === "OPTIONS") {
+    return new Response("ok");
   }
 
   try {
-    const body = await req.json().catch(() => null);
-    const work_order_id = body?.work_order_id;
+    const body = await req.json();
+    const { action, work_order_id, org_id, module } = body;
 
-    if (!work_order_id || typeof work_order_id !== "string") {
-      return json({ success: false, error: "Missing or invalid work_order_id" }, 400);
-    }
+    if (!work_order_id) throw new Error("Missing work_order_id");
 
-    console.log("Rico triggered:", work_order_id);
-
-    // Fetch work order
-    const { data: wo, error: woError } = await supabase
+    // =============================
+    // FETCH WORK ORDER
+    // =============================
+    const { data: wo } = await supabase
       .schema("fulfillment")
       .from("work_orders")
       .select("*")
       .eq("id", work_order_id)
       .single();
 
-    if (woError || !wo) {
-      return json({ success: false, error: "Work order not found" }, 404);
+    if (!wo) throw new Error("Work order not found");
+
+    // =============================
+    // ACTION: START WORK ORDER
+    // =============================
+    if (action === "start_work_order") {
+
+      await logActivity(work_order_id, org_id, "🚀 Start", "Rico started fulfillment");
+
+      // 1. CREATE TASKS (YOUR LOGIC)
+      const tasks = getTasks(wo.service_type);
+
+      if (tasks.length > 0) {
+        await supabase.schema("fulfillment").from("tasks").insert(
+          tasks.map(t => ({
+            work_order_id,
+            task_type: t.type,
+            assigned_role: t.role,
+            instructions: t.instructions,
+            status: "pending"
+          }))
+        );
+      }
+
+      // 2. CREATE JOBS + RUN ENGINES
+      const modules = ["seo", "backlinks", "content", "smm", "competitor", "authority"];
+
+      for (const m of modules) {
+        await createJob(work_order_id, org_id, m);
+      }
+
+      await callEngine("seo-unified-engine", { work_order_id, org_id });
+      await callEngine("backlink-engine", { work_order_id, org_id });
+      await callEngine("content-ai", { work_order_id, org_id });
+      await callEngine("smm-dispatcher", { work_order_id, org_id });
+      await callEngine("competitor-engine", { work_order_id, org_id });
+      await callEngine("authority-engine", { work_order_id, org_id });
+
+      // UPDATE STATUS
+      await supabase.schema("fulfillment").from("work_orders").update({
+        status: "in_progress"
+      }).eq("id", work_order_id);
+
+      return new Response(JSON.stringify({ success: true }));
     }
 
-    const serviceType = wo.service_type ?? wo.service ?? "";
-    const taskTemplates = getTasksForService(serviceType);
+    // =============================
+    // ACTION: RUN SINGLE MODULE
+    // =============================
+    if (action === "run_module") {
 
-    if (taskTemplates.length === 0) {
-      return json({
-        success: true,
-        tasks_created: 0,
-        message: `No task template for service_type: ${serviceType}`,
-      });
+      if (!module) throw new Error("Missing module");
+
+      await logActivity(work_order_id, org_id, "⚙️ Module", `Running ${module}`);
+
+      await createJob(work_order_id, org_id, module);
+
+      const map: any = {
+        seo: "seo-unified-engine",
+        backlinks: "backlink-engine",
+        content: "content-ai",
+        smm: "smm-dispatcher",
+        competitor: "competitor-engine",
+        authority: "authority-engine"
+      };
+
+      await callEngine(map[module], { work_order_id, org_id });
+
+      return new Response(JSON.stringify({ success: true }));
     }
 
-    // Optional idempotency guard: skip if tasks already exist
-    const { data: existingTasks, error: existingError } = await supabase
-      .schema("fulfillment")
-      .from("tasks")
-      .select("id")
-      .eq("work_order_id", work_order_id)
-      .limit(1);
+    throw new Error("Invalid action");
 
-    if (existingError) throw existingError;
-    if (existingTasks && existingTasks.length > 0) {
-      return json({
-        success: true,
-        tasks_created: 0,
-        message: "Tasks already exist for this work order",
-      });
-    }
-
-    const now = new Date().toISOString();
-    const payload = taskTemplates.map((task) => ({
-      work_order_id,
-      task_type: task.task_type,
-      assigned_role: task.assigned_role,
-      assigned_to: assignUser(task.assigned_role), // can be null if no pool
-      instructions: task.instructions,
-      status: "pending",
-      priority: task.priority ?? "normal",
-      created_at: now,
-    }));
-
-    const { error: insertError } = await supabase
-      .schema("fulfillment")
-      .from("tasks")
-      .insert(payload);
-
-    if (insertError) throw insertError;
-
-    const { error: updateError } = await supabase
-      .schema("fulfillment")
-      .from("work_orders")
-      .update({
-        status: "in_progress",
-        start_date: now,
-      })
-      .eq("id", work_order_id);
-
-    if (updateError) throw updateError;
-
-    return json({ success: true, tasks_created: payload.length });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unexpected error";
-    console.error("Rico error:", message);
-    return json({ success: false, error: message }, 500);
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 });

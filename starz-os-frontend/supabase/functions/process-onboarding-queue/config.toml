@@ -1,0 +1,4 @@
+[functions.process-onboarding-queue]
+verify_jwt = false
+[functions.zara-onboarding]
+verify_jwt = false
