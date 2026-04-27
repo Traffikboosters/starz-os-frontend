@@ -1,3 +1,5 @@
-{
-    "deno.enable": true
+﻿{
+  "deno.enable": false,
+  "deno.enablePaths": [],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

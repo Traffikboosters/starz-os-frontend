@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STARZ-OS v8.0 — Orbital Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cosmic: {
+              900: '#0a0a1a',
+              800: '#12122a',
+              700: '#1a1a3a',
+              600: '#252550',
+            },
+            stellar: {
+              50: '#f0f4ff',
+              100: '#e0e8ff',
+              200: '#c0d4ff',
+              300: '#90b0ff',
+              400: '#5c8aff',
+              500: '#3b6eff',
+              600: '#1e4af5',
+            },
+            nebula: {
+              purple: '#8b5cf6',
+              pink: '#ec4899',
+              cyan: '#06b6d4',
+              amber: '#f59e0b',
+            }
+          },
+          animation: {
+            'orbit': 'orbit 20s linear infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            orbit: {
+              '0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 5px #8b5cf6, 0 0 10px #8b5cf6' },
+              '100%': { boxShadow: '0 0 20px #8b5cf6, 0 0 40px #ec4899' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { font-family: 'Inter', sans-serif; }
+    .font-space { font-family: 'Space Grotesk', sans-serif; }
+
+    /* Cosmic Background */
+    .cosmic-bg {
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+      background-size: 100% 100%;
+    }
+
+    .light .cosmic-bg {
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+    }
+
+    /* Glassmorphism Panels */
+    .glass-cosmic {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .light .glass-cosmic {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-cosmic-strong {
+      background: rgba(10, 10, 26, 0.8);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .light .glass-cosmic-strong {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    /* Star Field Canvas */
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Orbital Dock */
+    .orbital-dock {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+    }
+
+    .dock-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dock-item:hover {
+      transform: translateY(-10px) scale(1.1);
+    }
+
+    /* Window Styles */
+    .cosmic-window {
+      background: rgba(18, 18, 42, 0.95);
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 0 100px rgba(139, 92, 246, 0.1) inset;
+    }
+
+    .light .cosmic-window {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    }
+
+    /* Holographic Cards */
+    .holo-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .holo-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 70%
+      );
+      animation: holoShine 3s ease-in-out infinite;
+    }
+
+    @keyframes holoShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .light .holo-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+    }
+
+    /* Grid Pattern */
+    .grid-pattern {
+      background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .light .grid-pattern {
+      background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: relative;
+      width: 60px;
+      height: 32px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .theme-toggle.light {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      border-color: rgba(251, 191, 36, 0.5);
+    }
+
+    .theme-toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-toggle.light .theme-toggle-slider {
+      transform: translateX(28px);
+    }
+
+    /* Animated Border */
+    .animated-border {
+      position: relative;
+      background: rgba(18, 18, 42, 0.8);
+      border-radius: 12px;
+    }
+
+    .animated-border::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4, #8b5cf6);
+      background-size: 300% 300%;
+      animation: borderRotate 3s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes borderRotate {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { 
+      background: rgba(139, 92, 246, 0.3); 
+      border-radius: 4px; 
+    }
+    ::-webkit-scrollbar-thumb:hover { 
+      background: rgba(139, 92, 246, 0.5); 
+    }
+
+    /* Light mode scrollbar */
+    .light ::-webkit-scrollbar-thumb { 
+      background: rgba(139, 92, 246, 0.2); 
+    }
+    .light ::-webkit-scrollbar-thumb:hover { 
+      background: rgba(139, 92, 246, 0.4); 
+    }
+  </style>
+<base target="_blank">
+</head>
+<body class="dark bg-cosmic-900 text-white min-h-screen overflow-hidden transition-colors duration-500">
+
+  <!-- Starfield Background -->
+  <canvas id="starfield"></canvas>
+
+  <!-- Cosmic Gradient Overlay -->
+  <div class="fixed inset-0 cosmic-bg pointer-events-none z-[1]"></div>
+
+  <!-- Grid Pattern Overlay -->
+  <div class="fixed inset-0 grid-pattern opacity-30 pointer-events-none z-[2]"></div>
+
+  <!-- TOP BAR -->
+  <div class="fixed top-0 left-0 right-0 h-14 glass-cosmic-strong flex items-center justify-between px-6 z-[1000] transition-colors duration-500">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center animate-glow">
+        <i data-lucide="orbit" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-space font-bold text-lg tracking-wide">STARZ-OS <span class="text-nebula-purple">v8.0</span></h1>
+        <p class="text-xs text-slate-400">Orbital Command Center</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-6">
+      <!-- System Status -->
+      <div class="hidden md:flex items-center gap-4 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <span class="text-slate-400">Systems Online</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="wifi" class="w-4 h-4 text-nebula-cyan"></i>
+          <span class="text-slate-400">Connected</span>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <div class="theme-toggle-slider">
+          <i data-lucide="moon" class="w-3 h-3 text-slate-700 dark-icon"></i>
+          <i data-lucide="sun" class="w-3 h-3 text-amber-500 light-icon hidden"></i>
+        </div>
+      </button>
+
+      <!-- User Profile -->
+      <div class="flex items-center gap-3 pl-4 border-l border-slate-700">
+        <div class="text-right hidden sm:block">
+          <div class="text-sm font-medium">Commander</div>
+          <div class="text-xs text-slate-400">Admin Access</div>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-cyan to-nebula-purple p-[2px]">
+          <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
+            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DESKTOP AREA -->
+  <div id="desktop" class="relative w-full h-screen pt-20 pb-32 px-8 z-[100]">
+
+    <!-- Left Sidebar: Active Modules -->
+    <div class="absolute left-8 top-24 bottom-40 w-64 flex flex-col gap-4">
+      <!-- Mission Control Widget -->
+      <div class="glass-cosmic rounded-2xl p-5 holo-card">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-lg bg-nebula-purple/20 flex items-center justify-center">
+            <i data-lucide="radar" class="w-4 h-4 text-nebula-purple"></i>
+          </div>
+          <span class="font-space font-semibold text-sm">Mission Control</span>
+        </div>
+        <div class="space-y-3">
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">Active Missions</span>
+            <span class="text-nebula-cyan font-mono">12</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">Success Rate</span>
+            <span class="text-green-400 font-mono">94.2%</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-slate-400">Response Time</span>
+            <span class="text-nebula-pink font-mono">24ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resource Monitor -->
+      <div class="glass-cosmic rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-lg bg-nebula-cyan/20 flex items-center justify-center">
+            <i data-lucide="gauge" class="w-4 h-4 text-nebula-cyan"></i>
+          </div>
+          <span class="font-space font-semibold text-sm">Resources</span>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">Processing</span>
+              <span class="text-slate-300">67%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-nebula-purple to-nebula-pink rounded-full" style="width: 67%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">Memory</span>
+              <span class="text-slate-300">42%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-nebula-cyan to-blue-500 rounded-full" style="width: 42%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">Storage</span>
+              <span class="text-slate-300">28%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full" style="width: 28%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="glass-cosmic rounded-2xl p-5 flex-1">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-lg bg-nebula-pink/20 flex items-center justify-center">
+            <i data-lucide="activity" class="w-4 h-4 text-nebula-pink"></i>
+          </div>
+          <span class="font-space font-semibold text-sm">Live Metrics</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="animated-border p-3 rounded-xl text-center">
+            <div class="text-2xl font-bold text-nebula-purple font-mono" id="live-revenue">$48.2K</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Revenue</div>
+          </div>
+          <div class="animated-border p-3 rounded-xl text-center">
+            <div class="text-2xl font-bold text-nebula-cyan font-mono">1,247</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Leads</div>
+          </div>
+          <div class="animated-border p-3 rounded-xl text-center">
+            <div class="text-2xl font-bold text-nebula-pink font-mono">89%</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Conversion</div>
+          </div>
+          <div class="animated-border p-3 rounded-xl text-center">
+            <div class="text-2xl font-bold text-green-400 font-mono">4.9</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Rating</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Window Container -->
+    <div id="window-container" class="absolute left-80 right-80 top-24 bottom-40 pointer-events-none">
+      <!-- Windows will be spawned here -->
+    </div>
+
+    <!-- Right Sidebar: Notifications & Chat -->
+    <div class="absolute right-8 top-24 bottom-40 w-64 flex flex-col gap-4">
+      <!-- Notifications Panel -->
+      <div class="glass-cosmic rounded-2xl p-5 flex-1 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-nebula-amber/20 flex items-center justify-center">
+              <i data-lucide="bell" class="w-4 h-4 text-nebula-amber"></i>
+            </div>
+            <span class="font-space font-semibold text-sm">Alerts</span>
+          </div>
+          <span class="w-5 h-5 bg-nebula-pink rounded-full text-[10px] flex items-center justify-center font-bold">3</span>
+        </div>
+        <div class="space-y-3 overflow-y-auto flex-1">
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-purple/50 transition-colors cursor-pointer">
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 bg-nebula-purple rounded-full mt-1.5 shrink-0"></span>
+              <div>
+                <p class="text-xs font-medium">New lead assigned</p>
+                <p class="text-[10px] text-slate-400 mt-1">2 minutes ago</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-cyan/50 transition-colors cursor-pointer">
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 bg-nebula-cyan rounded-full mt-1.5 shrink-0"></span>
+              <div>
+                <p class="text-xs font-medium">Deal closed</p>
+                <p class="text-[10px] text-slate-400 mt-1">$12,500 - Acme Corp</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-pink/50 transition-colors cursor-pointer">
+            <div class="flex items-start gap-2">
+              <span class="w-2 h-2 bg-nebula-pink rounded-full mt-1.5 shrink-0"></span>
+              <div>
+                <p class="text-xs font-medium">System update</p>
+                <p class="text-[10px] text-slate-400 mt-1">v8.0.1 available</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="glass-cosmic rounded-2xl p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+            <i data-lucide="zap" class="w-4 h-4 text-green-400"></i>
+          </div>
+          <span class="font-space font-semibold text-sm">Quick Actions</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="openWindow('compose')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-purple/20 border border-white/10 hover:border-nebula-purple/50 transition-all text-center group">
+            <i data-lucide="mail" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-purple"></i>
+            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Email</span>
+          </button>
+          <button onclick="openWindow('calendar')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-cyan/20 border border-white/10 hover:border-nebula-cyan/50 transition-all text-center group">
+            <i data-lucide="calendar" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-cyan"></i>
+            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Schedule</span>
+          </button>
+          <button onclick="openWindow('analytics')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-pink/20 border border-white/10 hover:border-nebula-pink/50 transition-all text-center group">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-pink"></i>
+            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Analytics</span>
+          </button>
+          <button onclick="openWindow('settings')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-amber/20 border border-white/10 hover:border-nebula-amber/50 transition-all text-center group">
+            <i data-lucide="settings" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-amber"></i>
+            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORBITAL DOCK (Bottom) -->
+  <div class="orbital-dock">
+    <div class="glass-cosmic-strong rounded-2xl px-4 py-3 flex items-center gap-2">
+      <!-- Core Apps -->
+      <button onclick="openWindow('dashboard')" class="dock-item w-14 h-14 rounded-xl bg-gradient-to-br from-nebula-purple to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group relative">
+        <i data-lucide="layout-dashboard" class="w-7 h-7 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Dashboard
+        </div>
+      </button>
+
+      <div class="w-px h-8 bg-slate-700 mx-2"></div>
+
+      <button onclick="openWindow('sales')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 group relative">
+        <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Sales
+        </div>
+      </button>
+
+      <button onclick="openWindow('steve')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center shadow-lg shadow-purple-500/20 group relative animate-pulse-slow">
+        <i data-lucide="bot" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Steve AI
+        </div>
+      </button>
+
+      <button onclick="openWindow('crm')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group relative">
+        <i data-lucide="users" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          CRM
+        </div>
+      </button>
+
+      <button onclick="openWindow('calls')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center shadow-lg shadow-rose-500/20 group relative">
+        <i data-lucide="phone" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Calls
+        </div>
+      </button>
+
+      <button onclick="openWindow('finance')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group relative">
+        <i data-lucide="dollar-sign" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Finance
+        </div>
+      </button>
+
+      <button onclick="openWindow('marketing')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/20 group relative">
+        <i data-lucide="megaphone" class="w-6 h-6 text-white"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Marketing
+        </div>
+      </button>
+
+      <div class="w-px h-8 bg-slate-700 mx-2"></div>
+
+      <button onclick="openWindow('files')" class="dock-item w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center hover:bg-slate-600 transition-colors group relative">
+        <i data-lucide="folder-open" class="w-6 h-6 text-slate-300"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Files
+        </div>
+      </button>
+
+      <button onclick="toggleSpotlight()" class="dock-item w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center hover:bg-slate-600 transition-colors group relative">
+        <i data-lucide="search" class="w-6 h-6 text-slate-300"></i>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
+          Search
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- SPOTLIGHT SEARCH -->
+  <div id="spotlight" class="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm hidden items-start justify-center pt-32 opacity-0 transition-opacity duration-300">
+    <div class="w-full max-w-2xl transform scale-95 transition-transform duration-300" id="spotlight-content">
+      <div class="glass-cosmic-strong rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+        <div class="flex items-center gap-4 p-4 border-b border-slate-700">
+          <i data-lucide="search" class="w-6 h-6 text-slate-400"></i>
+          <input type="text" id="spotlight-input" placeholder="Search commands, files, contacts..." 
+                 class="flex-1 bg-transparent text-lg outline-none text-white placeholder-slate-500 font-space">
+          <kbd class="px-2 py-1 bg-slate-700 rounded text-xs text-slate-400">ESC</kbd>
+        </div>
+        <div id="spotlight-results" class="max-h-96 overflow-y-auto p-2">
+          <div class="p-4 text-center text-slate-500 text-sm">
+            Type to search across all systems...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Management
+    function toggleTheme() {
+      const body = document.body;
+      const toggle = document.getElementById('themeToggle');
+      const darkIcon = toggle.querySelector('.dark-icon');
+      const lightIcon = toggle.querySelector('.light-icon');
+
+      if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        body.classList.add('light');
+        toggle.classList.add('light');
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.classList.remove('light');
+        body.classList.add('dark');
+        toggle.classList.remove('light');
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      toggleTheme();
+    }
+
+    // Starfield Animation
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let animationId;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2,
+          speed: Math.random() * 0.5 + 0.1,
+          opacity: Math.random(),
+          twinkle: Math.random() * 0.02
+        });
+      }
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const isDark = document.body.classList.contains('dark');
+      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, ' : 'rgba(139, 92, 246, ';
+
+      stars.forEach(star => {
+        star.opacity += star.twinkle;
+        if (star.opacity > 1 || star.opacity < 0.2) star.twinkle = -star.twinkle;
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fillStyle = (isDark ? 'rgba(255, 255, 255, ' : 'rgba(139, 92, 246, ') + star.opacity + ')';
+        ctx.fill();
+
+        // Move stars slowly
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+
+      animationId = requestAnimationFrame(animateStars);
+    }
+
+    resizeCanvas();
+    createStars();
+    animateStars();
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createStars();
+    });
+
+    // Window Management
+    const windows = {};
+    let zIndex = 1000;
+    let windowCount = 0;
+
+    const appConfigs = {
+      dashboard: { name: 'Command Dashboard', icon: 'layout-dashboard', color: 'from-nebula-purple to-purple-600', width: 1000, height: 700 },
+      sales: { name: 'Sales War Room', icon: 'trending-up', color: 'from-blue-500 to-cyan-500', width: 900, height: 600 },
+      steve: { name: 'Steve AI Console', icon: 'bot', color: 'from-nebula-purple to-nebula-pink', width: 800, height: 700 },
+      crm: { name: 'Partner CRM', icon: 'users', color: 'from-emerald-500 to-teal-500', width: 900, height: 650 },
+      calls: { name: 'Call Floor', icon: 'phone', color: 'from-rose-500 to-red-500', width: 850, height: 600 },
+      finance: { name: 'Finance Core', icon: 'dollar-sign', color: 'from-amber-500 to-orange-500', width: 900, height: 650 },
+      marketing: { name: 'Marketing Hub', icon: 'megaphone', color: 'from-violet-500 to-purple-500', width: 900, height: 600 },
+      files: { name: 'File Nexus', icon: 'folder-open', color: 'from-slate-500 to-slate-600', width: 800, height: 550 },
+      compose: { name: 'Compose', icon: 'mail', color: 'from-nebula-cyan to-blue-500', width: 600, height: 500 },
+      calendar: { name: 'Mission Schedule', icon: 'calendar', color: 'from-nebula-pink to-rose-500', width: 800, height: 600 },
+      analytics: { name: 'Analytics Core', icon: 'bar-chart-3', color: 'from-green-500 to-emerald-500', width: 900, height: 650 },
+      settings: { name: 'System Settings', icon: 'settings', color: 'from-slate-600 to-slate-700', width: 700, height: 550 }
+    };
+
+    function openWindow(appId) {
+      if (windows[appId]) {
+        focusWindow(appId);
+        return;
+      }
+
+      const config = appConfigs[appId];
+      const windowId = `window-${appId}-${Date.now()}`;
+      const container = document.getElementById('window-container');
+
+      // Calculate centered position with slight offset for multiple windows
+      const offset = windowCount * 30;
+      const left = 50 + offset;
+      const top = 20 + offset;
+
+      const win = document.createElement('div');
+      win.id = windowId;
+      win.className = 'absolute cosmic-window rounded-2xl overflow-hidden flex flex-col pointer-events-auto';
+      win.style.width = config.width + 'px';
+      win.style.height = config.height + 'px';
+      win.style.left = left + 'px';
+      win.style.top = top + 'px';
+      win.style.zIndex = ++zIndex;
+
+      win.innerHTML = `
+        <div class="window-header h-12 glass-cosmic border-b border-slate-700 flex items-center px-4 cursor-move select-none">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${config.color} flex items-center justify-center">
+              <i data-lucide="${config.icon}" class="w-4 h-4 text-white"></i>
+            </div>
+            <span class="font-space font-semibold text-sm">${config.name}</span>
+          </div>
+          <div class="flex-1"></div>
+          <div class="flex items-center gap-1">
+            <button onclick="minimizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <i data-lucide="minus" class="w-4 h-4 text-slate-400"></i>
+            </button>
+            <button onclick="maximizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <i data-lucide="maximize-2" class="w-4 h-4 text-slate-400"></i>
+            </button>
+            <button onclick="closeWindow('${windowId}')" class="p-2 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition-colors">
+              <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-auto p-6 bg-transparent">
+          ${getWindowContent(appId)}
+        </div>
+      `;
+
+      container.appendChild(win);
+      windows[windowId] = { element: win, minimized: false, maximized: false, appId };
+      windowCount++;
+
+      makeDraggable(win);
+      lucide.createIcons();
+
+      // Animate in
+      win.style.opacity = '0';
+      win.style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        win.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        win.style.opacity = '1';
+        win.style.transform = 'scale(1)';
+      }, 10);
+    }
+
+    function getWindowContent(appId) {
+      const contents = {
+        dashboard: `
+          <div class="space-y-6">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="holo-card rounded-xl p-5">
+                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Total Revenue</div>
+                <div class="text-3xl font-bold text-nebula-purple font-space">$2.4M</div>
+                <div class="text-xs text-green-400 mt-2 flex items-center gap-1">
+                  <i data-lucide="trending-up" class="w-3 h-3"></i> +12.5% this month
+                </div>
+              </div>
+              <div class="holo-card rounded-xl p-5">
+                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Active Deals</div>
+                <div class="text-3xl font-bold text-nebula-cyan font-space">47</div>
+                <div class="text-xs text-slate-400 mt-2">$890K in pipeline</div>
+              </div>
+              <div class="holo-card rounded-xl p-5">
+                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Conversion</div>
+                <div class="text-3xl font-bold text-nebula-pink font-space">24.8%</div>
+                <div class="text-xs text-green-400 mt-2">+3.2% vs last month</div>
+              </div>
+            </div>
+            <div class="glass-cosmic rounded-xl p-6">
+              <h3 class="font-space font-semibold mb-4">Recent Activity</h3>
+              <div class="space-y-3">
+                ${[1,2,3,4,5].map(i => `
+                  <div class="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center">
+                      <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                      <div class="font-medium text-sm">New lead from Campaign ${i}</div>
+                      <div class="text-xs text-slate-400">${i * 5} minutes ago</div>
+                    </div>
+                    <span class="px-2 py-1 bg-nebula-purple/20 text-nebula-purple text-xs rounded-full">New</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `,
+        steve: `
+          <div class="flex flex-col h-full">
+            <div class="flex-1 space-y-4 overflow-y-auto mb-4">
+              <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center shrink-0">
+                  <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="glass-cosmic rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+                  <p class="text-sm">Hello! I'm Steve AI, your business intelligence assistant. How can I help you optimize your operations today?</p>
+                </div>
+              </div>
+            </div>
+            <div class="glass-cosmic rounded-xl p-3 flex items-center gap-3">
+              <input type="text" placeholder="Ask Steve anything..." class="flex-1 bg-transparent outline-none text-sm">
+              <button class="p-2 bg-nebula-purple rounded-lg hover:bg-nebula-purple/80 transition-colors">
+                <i data-lucide="send" class="w-4 h-4 text-white"></i>
+              </button>
+            </div>
+          </div>
+        `,
+        sales: `
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="font-space font-bold text-xl">Sales Pipeline</h2>
+              <button class="px-4 py-2 bg-nebula-purple rounded-lg text-sm hover:bg-nebula-purple/80 transition-colors">
+                + New Deal
+              </button>
+            </div>
+            <div class="grid grid-cols-4 gap-4">
+              ${['Prospecting', 'Qualification', 'Proposal', 'Closed'].map((stage, i) => `
+                <div class="glass-cosmic rounded-xl p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium">${stage}</span>
+                    <span class="text-xs text-slate-400">${[12, 8, 5, 3][i]}</span>
+                  </div>
+                  <div class="space-y-2">
+                    ${[1, 2].map(j => `
+                      <div class="p-3 rounded-lg bg-white/5 border border-white/10 hover:border-nebula-purple/50 transition-colors cursor-pointer">
+                        <div class="text-sm font-medium">Deal ${i * 2 + j}</div>
+                        <div class="text-xs text-slate-400 mt-1">$${(i * 2 + j) * 15000}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `,
+        crm: `
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <input type="text" placeholder="Search partners..." class="flex-1 glass-cosmic rounded-xl px-4 py-2 text-sm outline-none focus:border-nebula-purple">
+              <button class="px-4 py-2 bg-nebula-cyan rounded-lg text-sm hover:bg-nebula-cyan/80 transition-colors">
+                + Add Partner
+              </button>
+            </div>
+            <div class="glass-cosmic rounded-xl overflow-hidden">
+              <table class="w-full text-sm">
+                <thead class="bg-white/5">
+                  <tr>
+                    <th class="text-left p-4 text-slate-400 font-medium">Partner</th>
+                    <th class="text-left p-4 text-slate-400 font-medium">Status</th>
+                    <th class="text-left p-4 text-slate-400 font-medium">Revenue</th>
+                    <th class="text-left p-4 text-slate-400 font-medium">Last Contact</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  ${['Acme Corp', 'TechStart Inc', 'Global Solutions', 'Innovate LLC'].map((name, i) => `
+                    <tr class="hover:bg-white/5 transition-colors cursor-pointer">
+                      <td class="p-4">
+                        <div class="flex items-center gap-3">
+                          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center text-xs font-bold">
+                            ${name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <span class="font-medium">${name}</span>
+                        </div>
+                      </td>
+                      <td class="p-4">
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Active</span>
+                      </td>
+                      <td class="p-4 font-mono">$${(i + 1) * 45000}</td>
+                      <td class="p-4 text-slate-400">${i + 1} days ago</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `,
+        settings: `
+          <div class="space-y-6">
+            <h2 class="font-space font-bold text-xl">System Settings</h2>
+            <div class="space-y-4">
+              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <div class="font-medium">Notifications</div>
+                  <div class="text-xs text-slate-400">Enable desktop alerts</div>
+                </div>
+                <button class="w-12 h-6 bg-nebula-purple rounded-full relative">
+                  <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                </button>
+              </div>
+              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <div class="font-medium">Auto-Sync</div>
+                  <div class="text-xs text-slate-400">Sync data every 30 seconds</div>
+                </div>
+                <button class="w-12 h-6 bg-nebula-purple rounded-full relative">
+                  <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                </button>
+              </div>
+              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <div class="font-medium">Sound Effects</div>
+                  <div class="text-xs text-slate-400">Play UI sounds</div>
+                </div>
+                <button class="w-12 h-6 bg-slate-700 rounded-full relative">
+                  <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+      };
+      return contents[appId] || `<div class="p-8 text-center text-slate-400">Module "${appId}" loaded successfully.<br>Select an option from the sidebar to begin.</div>`;
+    }
+
+    function closeWindow(windowId) {
+      const win = windows[windowId];
+      if (win) {
+        win.element.style.opacity = '0';
+        win.element.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          win.element.remove();
+          delete windows[windowId];
+          windowCount--;
+        }, 300);
+      }
+    }
+
+    function minimizeWindow(windowId) {
+      const win = windows[windowId];
+      if (win) {
+        win.element.style.transform = 'scale(0)';
+        win.element.style.opacity = '0';
+        win.minimized = true;
+        setTimeout(() => {
+          win.element.style.display = 'none';
+        }, 300);
+      }
+    }
+
+    function maximizeWindow(windowId) {
+      const win = windows[windowId];
+      if (win) {
+        if (win.maximized) {
+          win.element.style.width = '900px';
+          win.element.style.height = '600px';
+          win.element.style.left = '50px';
+          win.element.style.top = '50px';
+          win.maximized = false;
+        } else {
+          win.element.style.width = '100%';
+          win.element.style.height = '100%';
+          win.element.style.left = '0';
+          win.element.style.top = '0';
+          win.maximized = true;
+        }
+      }
+    }
+
+    function focusWindow(windowId) {
+      const win = windows[windowId];
+      if (win) {
+        if (win.minimized) {
+          win.element.style.display = 'flex';
+          win.element.style.transform = 'scale(1)';
+          win.element.style.opacity = '1';
+          win.minimized = false;
+        }
+        win.element.style.zIndex = ++zIndex;
+      }
+    }
+
+    function makeDraggable(element) {
+      const header = element.querySelector('.window-header');
+      let isDragging = false;
+      let currentX, currentY, initialX, initialY;
+
+      header.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        initialX = e.clientX - element.offsetLeft;
+        initialY = e.clientY - element.offsetTop;
+        element.style.zIndex = ++zIndex;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+        element.style.left = currentX + 'px';
+        element.style.top = currentY + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+    }
+
+    // Spotlight Search
+    function toggleSpotlight() {
+      const spotlight = document.getElementById('spotlight');
+      const content = document.getElementById('spotlight-content');
+      const input = document.getElementById('spotlight-input');
+
+      if (spotlight.classList.contains('hidden')) {
+        spotlight.classList.remove('hidden');
+        spotlight.classList.add('flex');
+        setTimeout(() => {
+          spotlight.style.opacity = '1';
+          content.style.transform = 'scale(1)';
+        }, 10);
+        input.focus();
+      } else {
+        spotlight.style.opacity = '0';
+        content.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          spotlight.classList.add('hidden');
+          spotlight.classList.remove('flex');
+        }, 300);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const spotlight = document.getElementById('spotlight');
+        if (!spotlight.classList.contains('hidden')) {
+          toggleSpotlight();
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        toggleSpotlight();
+      }
+    });
+
+    // Initialize
+    lucide.createIcons();
+
+    // Update live revenue randomly
+    setInterval(() => {
+      const base = 48.2;
+      const variation = (Math.random() - 0.5) * 2;
+      document.getElementById('live-revenue').textContent = '$' + (base + variation).toFixed(1) + 'K';
+    }, 5000);
+ 
