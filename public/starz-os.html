@@ -5,53 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STARZ-OS v8.0 — Orbital Command Center</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            cosmic: {
-              900: '#0a0a1a',
-              800: '#12122a',
-              700: '#1a1a3a',
-              600: '#252550',
-            },
-            stellar: {
-              50: '#f0f4ff',
-              100: '#e0e8ff',
-              200: '#c0d4ff',
-              300: '#90b0ff',
-              400: '#5c8aff',
-              500: '#3b6eff',
-              600: '#1e4af5',
-            },
-            nebula: {
-              purple: '#8b5cf6',
-              pink: '#ec4899',
-              cyan: '#06b6d4',
-              amber: '#f59e0b',
-            }
+            cosmic: { 900: '#0a0a1a', 800: '#12122a', 700: '#1a1a3a', 600: '#252550' },
+            nebula: { purple: '#8b5cf6', pink: '#ec4899', cyan: '#06b6d4', amber: '#f59e0b' }
           },
           animation: {
-            'orbit': 'orbit 20s linear infinite',
             'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'float': 'float 6s ease-in-out infinite',
             'glow': 'glow 2s ease-in-out infinite alternate',
           },
           keyframes: {
-            orbit: {
-              '0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
-              '100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' },
-            },
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-20px)' },
-            },
             glow: {
               '0%': { boxShadow: '0 0 5px #8b5cf6, 0 0 10px #8b5cf6' },
-              '100%': { boxShadow: '0 0 20px #8b5cf6, 0 0 40px #ec4899' },
+              '100%': { boxShadow: '0 0 20px #8b5cf6, 0 0 40px #ec4899' }
             }
           }
         }
@@ -60,1029 +31,973 @@
   </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
     * { font-family: 'Inter', sans-serif; }
     .font-space { font-family: 'Space Grotesk', sans-serif; }
-
-    /* Cosmic Background */
     .cosmic-bg {
-      background: 
-        radial-gradient(ellipse at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
-      background-size: 100% 100%;
+      background: radial-gradient(ellipse at 20% 80%, rgba(139,92,246,0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 20%, rgba(236,72,153,0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 40% 40%, rgba(6,182,212,0.1) 0%, transparent 40%);
     }
-
-    .light .cosmic-bg {
-      background: 
-        radial-gradient(ellipse at 20% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
-        linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
-    }
-
-    /* Glassmorphism Panels */
-    .glass-cosmic {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .light .glass-cosmic {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    .glass-cosmic-strong {
-      background: rgba(10, 10, 26, 0.8);
-      backdrop-filter: blur(30px);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-    }
-
-    .light .glass-cosmic-strong {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-    }
-
-    /* Star Field Canvas */
-    #starfield {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Orbital Dock */
-    .orbital-dock {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-    }
-
-    .dock-item {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .dock-item:hover {
-      transform: translateY(-10px) scale(1.1);
-    }
-
-    /* Window Styles */
-    .cosmic-window {
-      background: rgba(18, 18, 42, 0.95);
-      backdrop-filter: blur(40px);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-        0 0 100px rgba(139, 92, 246, 0.1) inset;
-    }
-
-    .light .cosmic-window {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-    }
-
-    /* Holographic Cards */
-    .holo-card {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .holo-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.05) 50%,
-        transparent 70%
-      );
-      animation: holoShine 3s ease-in-out infinite;
-    }
-
-    @keyframes holoShine {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-
-    .light .holo-card {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.15);
-    }
-
-    /* Grid Pattern */
+    .glass-cosmic { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-cosmic-strong { background: rgba(10,10,26,0.85); backdrop-filter: blur(30px); border: 1px solid rgba(139,92,246,0.2); }
+    #starfield { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+    .orbital-dock { position:fixed; bottom:40px; left:50%; transform:translateX(-50%); z-index:1000; }
     .grid-pattern {
-      background-image: 
-        linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(139,92,246,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.1) 1px, transparent 1px);
       background-size: 50px 50px;
     }
-
-    .light .grid-pattern {
-      background-image: 
-        linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
-    }
-
-    /* Theme Toggle Button */
-    .theme-toggle {
-      position: relative;
-      width: 60px;
-      height: 32px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 2px solid rgba(139, 92, 246, 0.3);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-
-    .theme-toggle.light {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-      border-color: rgba(251, 191, 36, 0.5);
-    }
-
-    .theme-toggle-slider {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: white;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .theme-toggle.light .theme-toggle-slider {
-      transform: translateX(28px);
-    }
-
-    /* Animated Border */
-    .animated-border {
-      position: relative;
-      background: rgba(18, 18, 42, 0.8);
-      border-radius: 12px;
-    }
-
-    .animated-border::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 14px;
-      background: linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4, #8b5cf6);
-      background-size: 300% 300%;
-      animation: borderRotate 3s linear infinite;
-      z-index: -1;
-    }
-
-    @keyframes borderRotate {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { 
-      background: rgba(139, 92, 246, 0.3); 
-      border-radius: 4px; 
-    }
-    ::-webkit-scrollbar-thumb:hover { 
-      background: rgba(139, 92, 246, 0.5); 
-    }
-
-    /* Light mode scrollbar */
-    .light ::-webkit-scrollbar-thumb { 
-      background: rgba(139, 92, 246, 0.2); 
-    }
-    .light ::-webkit-scrollbar-thumb:hover { 
-      background: rgba(139, 92, 246, 0.4); 
-    }
+    .dock-item { position:relative; transition:transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s; overflow:visible !important; }
+    .dock-item:hover { transform:translateY(-12px) scale(1.12) !important; }
+    .dock-item::before { content:''; position:absolute; top:0; left:0; width:100%; height:52%; border-radius:14px 14px 50% 50%; background:linear-gradient(175deg,rgba(255,255,255,0.28) 0%,transparent 100%); z-index:10; pointer-events:none; }
+    .dock-item::after { content:''; position:absolute; bottom:-6px; left:10%; width:80%; height:8px; border-radius:50%; background:rgba(0,0,0,0.45); filter:blur(5px); z-index:0; transition:opacity 0.18s,transform 0.18s; }
+    .dock-item:hover::after { opacity:0.6; transform:scaleX(0.85); }
+    .dock-dashboard { background:linear-gradient(145deg,#a78bfa 0%,#7c3aed 45%,#4c1d95 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(124,58,237,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-dashboard:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(124,58,237,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-sales { background:linear-gradient(145deg,#93c5fd 0%,#3b82f6 45%,#1e3a8a 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(59,130,246,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-sales:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(59,130,246,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-steve { background:linear-gradient(145deg,#f9a8d4 0%,#ec4899 45%,#9d174d 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(236,72,153,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-steve:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(236,72,153,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-crm { background:linear-gradient(145deg,#6ee7b7 0%,#10b981 45%,#064e3b 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(16,185,129,0.6),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-crm:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(16,185,129,0.85),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-calls { background:linear-gradient(145deg,#fca5a5 0%,#ef4444 45%,#7f1d1d 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(239,68,68,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-calls:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(239,68,68,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-finance { background:linear-gradient(145deg,#fcd34d 0%,#f59e0b 45%,#78350f 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(245,158,11,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-finance:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(245,158,11,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-marketing { background:linear-gradient(145deg,#c4b5fd 0%,#8b5cf6 45%,#3b0764 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(139,92,246,0.65),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-marketing:hover { box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 20px 50px rgba(139,92,246,0.9),0 4px 10px rgba(0,0,0,0.65) !important; }
+    .dock-files { background:linear-gradient(145deg,#94a3b8 0%,#475569 45%,#0f172a 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.22) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(71,85,105,0.55),0 2px 6px rgba(0,0,0,0.55); }
+    .dock-search { background:linear-gradient(145deg,#5eead4 0%,#14b8a6 45%,#134e4a 100%) !important; box-shadow:0 1px 0 rgba(255,255,255,0.32) inset,0 -3px 0 rgba(0,0,0,0.45) inset,0 8px 28px rgba(20,184,166,0.6),0 2px 6px rgba(0,0,0,0.55); }
+    .holo-card { background:linear-gradient(135deg,rgba(139,92,246,0.1) 0%,rgba(236,72,153,0.1) 100%); border:1px solid rgba(139,92,246,0.2); position:relative; overflow:hidden; }
+    .holo-card::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.05) 50%,transparent 70%); animation:holoShine 3s ease-in-out infinite; }
+    @keyframes holoShine { 0%{transform:translateX(-100%) translateY(-100%) rotate(45deg)} 100%{transform:translateX(100%) translateY(100%) rotate(45deg)} }
+    .animated-border { position:relative; background:rgba(18,18,42,0.8); border-radius:12px; }
+    .animated-border::before { content:''; position:absolute; inset:-2px; border-radius:14px; background:linear-gradient(90deg,#8b5cf6,#ec4899,#06b6d4,#8b5cf6); background-size:300% 300%; animation:borderRotate 3s linear infinite; z-index:-1; }
+    @keyframes borderRotate { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .cosmic-window { background:rgba(18,18,42,0.95); backdrop-filter:blur(40px); border:1px solid rgba(139,92,246,0.2); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.05) inset,0 0 100px rgba(139,92,246,0.1) inset; }
+    .theme-toggle { position:relative; width:60px; height:32px; border-radius:16px; background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%); border:2px solid rgba(139,92,246,0.3); cursor:pointer; transition:all 0.3s ease; }
+    .theme-toggle.light { background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%); border-color:rgba(251,191,36,0.5); }
+    .theme-toggle-slider { position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:white; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+    .theme-toggle.light .theme-toggle-slider { transform:translateX(28px); }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:rgba(139,92,246,0.3); border-radius:3px; }
+    .stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(139,92,246,0.15); border-radius:12px; padding:16px; }
+    .data-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .data-table th { text-align:left; padding:8px 12px; color:rgba(148,163,184,1); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .data-table td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(226,232,240,1); }
+    .data-table tr:hover td { background:rgba(255,255,255,0.03); }
+    .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:9999px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+    .badge-green { background:rgba(16,185,129,0.2); color:#34d399; }
+    .badge-blue { background:rgba(59,130,246,0.2); color:#60a5fa; }
+    .badge-purple { background:rgba(139,92,246,0.2); color:#a78bfa; }
+    .badge-red { background:rgba(239,68,68,0.2); color:#f87171; }
+    .badge-amber { background:rgba(245,158,11,0.2); color:#fbbf24; }
+    .badge-gray { background:rgba(100,116,139,0.2); color:#94a3b8; }
+    .loading-pulse { animation:pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .spinner { width:20px; height:20px; border:2px solid rgba(139,92,246,0.3); border-top-color:#8b5cf6; border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+    @keyframes spin { to{transform:rotate(360deg)} }
   </style>
-<base target="_blank">
 </head>
-<body class="dark bg-cosmic-900 text-white min-h-screen overflow-hidden transition-colors duration-500">
+<body class="dark bg-cosmic-900 text-white min-h-screen overflow-hidden">
 
-  <!-- Starfield Background -->
-  <canvas id="starfield"></canvas>
+<canvas id="starfield"></canvas>
+<div class="fixed inset-0 cosmic-bg pointer-events-none z-[1]"></div>
+<div class="fixed inset-0 grid-pattern opacity-30 pointer-events-none z-[2]"></div>
 
-  <!-- Cosmic Gradient Overlay -->
-  <div class="fixed inset-0 cosmic-bg pointer-events-none z-[1]"></div>
-
-  <!-- Grid Pattern Overlay -->
-  <div class="fixed inset-0 grid-pattern opacity-30 pointer-events-none z-[2]"></div>
-
-  <!-- TOP BAR -->
-  <div class="fixed top-0 left-0 right-0 h-14 glass-cosmic-strong flex items-center justify-between px-6 z-[1000] transition-colors duration-500">
-    <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center animate-glow">
-        <i data-lucide="orbit" class="w-6 h-6 text-white"></i>
+<!-- TOP BAR -->
+<div class="fixed top-0 left-0 right-0 h-14 glass-cosmic-strong flex items-center justify-between px-6 z-[1000]">
+  <div class="flex items-center gap-4">
+    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center animate-glow">
+      <i data-lucide="star" class="w-6 h-6 text-white"></i>
+    </div>
+    <div>
+      <h1 class="font-space font-bold text-lg tracking-wide">STARZ-OS <span class="text-nebula-purple">v8.0</span></h1>
+      <p class="text-xs text-slate-400">Orbital Command Center</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-6">
+    <div class="hidden md:flex items-center gap-4 text-xs">
+      <div class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span><span class="text-slate-400">Live Data</span></div>
+      <div class="flex items-center gap-2"><i data-lucide="database" class="w-4 h-4 text-nebula-cyan"></i><span class="text-slate-400">Supabase Connected</span></div>
+    </div>
+    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
+      <div class="theme-toggle-slider">
+        <i data-lucide="moon" class="w-3 h-3 text-slate-700 dark-icon"></i>
+        <i data-lucide="sun" class="w-3 h-3 text-amber-500 light-icon hidden"></i>
       </div>
-      <div>
-        <h1 class="font-space font-bold text-lg tracking-wide">STARZ-OS <span class="text-nebula-purple">v8.0</span></h1>
-        <p class="text-xs text-slate-400">Orbital Command Center</p>
+    </button>
+    <div class="flex items-center gap-3 pl-4 border-l border-slate-700">
+      <div class="text-right hidden sm:block"><div class="text-sm font-medium">Commander DJ</div><div class="text-xs text-slate-400">Admin Access</div></div>
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-cyan to-nebula-purple p-[2px]">
+        <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-slate-400"></i></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="flex items-center gap-6">
-      <!-- System Status -->
-      <div class="hidden md:flex items-center gap-4 text-xs">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          <span class="text-slate-400">Systems Online</span>
+<!-- MAIN DESKTOP -->
+<div id="desktop" class="relative w-full h-screen pt-20 pb-32 px-8 z-[100]">
+
+  <!-- Left Sidebar -->
+  <div class="absolute left-8 top-24 bottom-40 w-64 flex flex-col gap-4">
+    <div class="glass-cosmic rounded-2xl p-5 holo-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-nebula-purple/20 flex items-center justify-center"><i data-lucide="radar" class="w-4 h-4 text-nebula-purple"></i></div>
+        <span class="font-space font-semibold text-sm">Mission Control</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Pipeline Deals</span><span class="text-nebula-cyan font-mono" id="sb-pipeline-count">—</span></div>
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Active Leads</span><span class="text-green-400 font-mono" id="sb-leads-count">—</span></div>
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Work Orders</span><span class="text-nebula-pink font-mono" id="sb-wo-count">—</span></div>
+      </div>
+    </div>
+    <div class="glass-cosmic rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-nebula-cyan/20 flex items-center justify-center"><i data-lucide="gauge" class="w-4 h-4 text-nebula-cyan"></i></div>
+        <span class="font-space font-semibold text-sm">Pipeline Health</span>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Proposals</span><span class="text-slate-300" id="sb-proposals-pct">—</span></div>
+          <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-nebula-purple to-nebula-pink rounded-full transition-all duration-1000" id="sb-proposals-bar" style="width:0%"></div></div>
         </div>
-        <div class="flex items-center gap-2">
-          <i data-lucide="wifi" class="w-4 h-4 text-nebula-cyan"></i>
-          <span class="text-slate-400">Connected</span>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Closing</span><span class="text-slate-300" id="sb-closing-pct">—</span></div>
+          <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-nebula-cyan to-blue-500 rounded-full transition-all duration-1000" id="sb-closing-bar" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">Won</span><span class="text-slate-300" id="sb-won-pct">—</span></div>
+          <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-1000" id="sb-won-bar" style="width:0%"></div></div>
         </div>
       </div>
-
-      <!-- Theme Toggle -->
-      <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <div class="theme-toggle-slider">
-          <i data-lucide="moon" class="w-3 h-3 text-slate-700 dark-icon"></i>
-          <i data-lucide="sun" class="w-3 h-3 text-amber-500 light-icon hidden"></i>
-        </div>
-      </button>
-
-      <!-- User Profile -->
-      <div class="flex items-center gap-3 pl-4 border-l border-slate-700">
-        <div class="text-right hidden sm:block">
-          <div class="text-sm font-medium">Commander</div>
-          <div class="text-xs text-slate-400">Admin Access</div>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-cyan to-nebula-purple p-[2px]">
-          <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
-            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
-          </div>
-        </div>
+    </div>
+    <div class="glass-cosmic rounded-2xl p-5 flex-1">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-nebula-pink/20 flex items-center justify-center"><i data-lucide="activity" class="w-4 h-4 text-nebula-pink"></i></div>
+        <span class="font-space font-semibold text-sm">Live KPIs</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="animated-border p-3 rounded-xl text-center"><div class="text-xl font-bold text-nebula-purple font-mono" id="sb-revenue">—</div><div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Revenue</div></div>
+        <div class="animated-border p-3 rounded-xl text-center"><div class="text-xl font-bold text-nebula-cyan font-mono" id="sb-leads-total">—</div><div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Leads</div></div>
+        <div class="animated-border p-3 rounded-xl text-center"><div class="text-xl font-bold text-nebula-pink font-mono" id="sb-close-rate">—</div><div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Close Rate</div></div>
+        <div class="animated-border p-3 rounded-xl text-center"><div class="text-xl font-bold text-green-400 font-mono" id="sb-deals-won">—</div><div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Won</div></div>
       </div>
     </div>
   </div>
 
-  <!-- MAIN DESKTOP AREA -->
-  <div id="desktop" class="relative w-full h-screen pt-20 pb-32 px-8 z-[100]">
+  <!-- Window Container -->
+  <div id="window-container" class="absolute left-80 right-80 top-24 bottom-40 pointer-events-none"></div>
 
-    <!-- Left Sidebar: Active Modules -->
-    <div class="absolute left-8 top-24 bottom-40 w-64 flex flex-col gap-4">
-      <!-- Mission Control Widget -->
-      <div class="glass-cosmic rounded-2xl p-5 holo-card">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-nebula-purple/20 flex items-center justify-center">
-            <i data-lucide="radar" class="w-4 h-4 text-nebula-purple"></i>
-          </div>
-          <span class="font-space font-semibold text-sm">Mission Control</span>
+  <!-- Right Sidebar -->
+  <div class="absolute right-8 top-24 bottom-40 w-64 flex flex-col gap-4">
+    <div class="glass-cosmic rounded-2xl p-5 flex-1 flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-nebula-amber/20 flex items-center justify-center"><i data-lucide="bell" class="w-4 h-4 text-nebula-amber"></i></div>
+          <span class="font-space font-semibold text-sm">Live Alerts</span>
         </div>
-        <div class="space-y-3">
-          <div class="flex justify-between text-xs">
-            <span class="text-slate-400">Active Missions</span>
-            <span class="text-nebula-cyan font-mono">12</span>
-          </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-slate-400">Success Rate</span>
-            <span class="text-green-400 font-mono">94.2%</span>
-          </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-slate-400">Response Time</span>
-            <span class="text-nebula-pink font-mono">24ms</span>
-          </div>
-        </div>
+        <span class="w-5 h-5 bg-nebula-pink rounded-full text-[10px] flex items-center justify-center font-bold" id="alert-count">0</span>
       </div>
-
-      <!-- Resource Monitor -->
-      <div class="glass-cosmic rounded-2xl p-5">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-nebula-cyan/20 flex items-center justify-center">
-            <i data-lucide="gauge" class="w-4 h-4 text-nebula-cyan"></i>
-          </div>
-          <span class="font-space font-semibold text-sm">Resources</span>
-        </div>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="text-slate-400">Processing</span>
-              <span class="text-slate-300">67%</span>
-            </div>
-            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-nebula-purple to-nebula-pink rounded-full" style="width: 67%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="text-slate-400">Memory</span>
-              <span class="text-slate-300">42%</span>
-            </div>
-            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-nebula-cyan to-blue-500 rounded-full" style="width: 42%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="text-slate-400">Storage</span>
-              <span class="text-slate-300">28%</span>
-            </div>
-            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full" style="width: 28%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="glass-cosmic rounded-2xl p-5 flex-1">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-nebula-pink/20 flex items-center justify-center">
-            <i data-lucide="activity" class="w-4 h-4 text-nebula-pink"></i>
-          </div>
-          <span class="font-space font-semibold text-sm">Live Metrics</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="animated-border p-3 rounded-xl text-center">
-            <div class="text-2xl font-bold text-nebula-purple font-mono" id="live-revenue">$48.2K</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Revenue</div>
-          </div>
-          <div class="animated-border p-3 rounded-xl text-center">
-            <div class="text-2xl font-bold text-nebula-cyan font-mono">1,247</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Leads</div>
-          </div>
-          <div class="animated-border p-3 rounded-xl text-center">
-            <div class="text-2xl font-bold text-nebula-pink font-mono">89%</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Conversion</div>
-          </div>
-          <div class="animated-border p-3 rounded-xl text-center">
-            <div class="text-2xl font-bold text-green-400 font-mono">4.9</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-1">Rating</div>
-          </div>
-        </div>
+      <div class="space-y-3 overflow-y-auto flex-1" id="alerts-container">
+        <div class="p-3 rounded-xl bg-white/5 text-center text-xs text-slate-500">Loading alerts...</div>
       </div>
     </div>
-
-    <!-- Center: Window Container -->
-    <div id="window-container" class="absolute left-80 right-80 top-24 bottom-40 pointer-events-none">
-      <!-- Windows will be spawned here -->
-    </div>
-
-    <!-- Right Sidebar: Notifications & Chat -->
-    <div class="absolute right-8 top-24 bottom-40 w-64 flex flex-col gap-4">
-      <!-- Notifications Panel -->
-      <div class="glass-cosmic rounded-2xl p-5 flex-1 flex flex-col">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-nebula-amber/20 flex items-center justify-center">
-              <i data-lucide="bell" class="w-4 h-4 text-nebula-amber"></i>
-            </div>
-            <span class="font-space font-semibold text-sm">Alerts</span>
-          </div>
-          <span class="w-5 h-5 bg-nebula-pink rounded-full text-[10px] flex items-center justify-center font-bold">3</span>
-        </div>
-        <div class="space-y-3 overflow-y-auto flex-1">
-          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-purple/50 transition-colors cursor-pointer">
-            <div class="flex items-start gap-2">
-              <span class="w-2 h-2 bg-nebula-purple rounded-full mt-1.5 shrink-0"></span>
-              <div>
-                <p class="text-xs font-medium">New lead assigned</p>
-                <p class="text-[10px] text-slate-400 mt-1">2 minutes ago</p>
-              </div>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-cyan/50 transition-colors cursor-pointer">
-            <div class="flex items-start gap-2">
-              <span class="w-2 h-2 bg-nebula-cyan rounded-full mt-1.5 shrink-0"></span>
-              <div>
-                <p class="text-xs font-medium">Deal closed</p>
-                <p class="text-[10px] text-slate-400 mt-1">$12,500 - Acme Corp</p>
-              </div>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-nebula-pink/50 transition-colors cursor-pointer">
-            <div class="flex items-start gap-2">
-              <span class="w-2 h-2 bg-nebula-pink rounded-full mt-1.5 shrink-0"></span>
-              <div>
-                <p class="text-xs font-medium">System update</p>
-                <p class="text-[10px] text-slate-400 mt-1">v8.0.1 available</p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="glass-cosmic rounded-2xl p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center"><i data-lucide="zap" class="w-4 h-4 text-green-400"></i></div>
+        <span class="font-space font-semibold text-sm">Quick Actions</span>
       </div>
-
-      <!-- Quick Actions -->
-      <div class="glass-cosmic rounded-2xl p-5">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
-            <i data-lucide="zap" class="w-4 h-4 text-green-400"></i>
-          </div>
-          <span class="font-space font-semibold text-sm">Quick Actions</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="openWindow('compose')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-purple/20 border border-white/10 hover:border-nebula-purple/50 transition-all text-center group">
-            <i data-lucide="mail" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-purple"></i>
-            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Email</span>
-          </button>
-          <button onclick="openWindow('calendar')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-cyan/20 border border-white/10 hover:border-nebula-cyan/50 transition-all text-center group">
-            <i data-lucide="calendar" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-cyan"></i>
-            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Schedule</span>
-          </button>
-          <button onclick="openWindow('analytics')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-pink/20 border border-white/10 hover:border-nebula-pink/50 transition-all text-center group">
-            <i data-lucide="bar-chart-3" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-pink"></i>
-            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Analytics</span>
-          </button>
-          <button onclick="openWindow('settings')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-amber/20 border border-white/10 hover:border-nebula-amber/50 transition-all text-center group">
-            <i data-lucide="settings" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-amber"></i>
-            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Settings</span>
-          </button>
-        </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="openWindow('dashboard')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-purple/20 border border-white/10 hover:border-nebula-purple/50 transition-all text-center group">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-purple"></i>
+          <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Dashboard</span>
+        </button>
+        <button onclick="openWindow('sales')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-cyan/20 border border-white/10 hover:border-nebula-cyan/50 transition-all text-center group">
+          <i data-lucide="trending-up" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-cyan"></i>
+          <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Sales</span>
+        </button>
+        <button onclick="openWindow('calls')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-pink/20 border border-white/10 hover:border-nebula-pink/50 transition-all text-center group">
+          <i data-lucide="phone" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-pink"></i>
+          <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Calls</span>
+        </button>
+        <button onclick="openWindow('finance')" class="p-3 rounded-xl bg-white/5 hover:bg-nebula-amber/20 border border-white/10 hover:border-nebula-amber/50 transition-all text-center group">
+          <i data-lucide="dollar-sign" class="w-5 h-5 mx-auto mb-1 text-slate-400 group-hover:text-nebula-amber"></i>
+          <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Finance</span>
+        </button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ORBITAL DOCK (Bottom) -->
-  <div class="orbital-dock">
-    <div class="glass-cosmic-strong rounded-2xl px-4 py-3 flex items-center gap-2">
-      <!-- Core Apps -->
-      <button onclick="openWindow('dashboard')" class="dock-item w-14 h-14 rounded-xl bg-gradient-to-br from-nebula-purple to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group relative">
-        <i data-lucide="layout-dashboard" class="w-7 h-7 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Dashboard
-        </div>
-      </button>
-
-      <div class="w-px h-8 bg-slate-700 mx-2"></div>
-
-      <button onclick="openWindow('sales')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 group relative">
-        <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Sales
-        </div>
-      </button>
-
-      <button onclick="openWindow('steve')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center shadow-lg shadow-purple-500/20 group relative animate-pulse-slow">
-        <i data-lucide="bot" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Steve AI
-        </div>
-      </button>
-
-      <button onclick="openWindow('crm')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group relative">
-        <i data-lucide="users" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          CRM
-        </div>
-      </button>
-
-      <button onclick="openWindow('calls')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center shadow-lg shadow-rose-500/20 group relative">
-        <i data-lucide="phone" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Calls
-        </div>
-      </button>
-
-      <button onclick="openWindow('finance')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group relative">
-        <i data-lucide="dollar-sign" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Finance
-        </div>
-      </button>
-
-      <button onclick="openWindow('marketing')" class="dock-item w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/20 group relative">
-        <i data-lucide="megaphone" class="w-6 h-6 text-white"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Marketing
-        </div>
-      </button>
-
-      <div class="w-px h-8 bg-slate-700 mx-2"></div>
-
-      <button onclick="openWindow('files')" class="dock-item w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center hover:bg-slate-600 transition-colors group relative">
-        <i data-lucide="folder-open" class="w-6 h-6 text-slate-300"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Files
-        </div>
-      </button>
-
-      <button onclick="toggleSpotlight()" class="dock-item w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center hover:bg-slate-600 transition-colors group relative">
-        <i data-lucide="search" class="w-6 h-6 text-slate-300"></i>
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-          Search
-        </div>
-      </button>
-    </div>
+<!-- ORBITAL DOCK -->
+<div class="orbital-dock">
+  <div class="glass-cosmic-strong rounded-2xl px-4 py-3 flex items-center gap-2">
+    <button onclick="openWindow('dashboard')" class="dock-item dock-dashboard w-14 h-14 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="layout-dashboard" class="w-7 h-7 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Dashboard</div>
+    </button>
+    <div class="w-px h-8 bg-slate-700 mx-1"></div>
+    <button onclick="openWindow('sales')" class="dock-item dock-sales w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="trending-up" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Sales</div>
+    </button>
+    <button onclick="openWindow('steve')" class="dock-item dock-steve w-12 h-12 rounded-xl flex items-center justify-center group relative animate-pulse-slow">
+      <i data-lucide="bot" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Steve AI</div>
+    </button>
+    <button onclick="openWindow('crm')" class="dock-item dock-crm w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="users" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">CRM</div>
+    </button>
+    <button onclick="openWindow('calls')" class="dock-item dock-calls w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="phone" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Calls</div>
+    </button>
+    <button onclick="openWindow('finance')" class="dock-item dock-finance w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="dollar-sign" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Finance</div>
+    </button>
+    <button onclick="openWindow('marketing')" class="dock-item dock-marketing w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="megaphone" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Marketing</div>
+    </button>
+    <div class="w-px h-8 bg-slate-700 mx-1"></div>
+    <button onclick="openWindow('files')" class="dock-item dock-files w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="folder-open" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Work Orders</div>
+    </button>
+    <button onclick="toggleSpotlight()" class="dock-item dock-search w-12 h-12 rounded-xl flex items-center justify-center group relative">
+      <i data-lucide="search" class="w-6 h-6 text-white relative z-10"></i>
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">Search</div>
+    </button>
   </div>
+</div>
 
-  <!-- SPOTLIGHT SEARCH -->
-  <div id="spotlight" class="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm hidden items-start justify-center pt-32 opacity-0 transition-opacity duration-300">
-    <div class="w-full max-w-2xl transform scale-95 transition-transform duration-300" id="spotlight-content">
-      <div class="glass-cosmic-strong rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
-        <div class="flex items-center gap-4 p-4 border-b border-slate-700">
-          <i data-lucide="search" class="w-6 h-6 text-slate-400"></i>
-          <input type="text" id="spotlight-input" placeholder="Search commands, files, contacts..." 
-                 class="flex-1 bg-transparent text-lg outline-none text-white placeholder-slate-500 font-space">
-          <kbd class="px-2 py-1 bg-slate-700 rounded text-xs text-slate-400">ESC</kbd>
-        </div>
-        <div id="spotlight-results" class="max-h-96 overflow-y-auto p-2">
-          <div class="p-4 text-center text-slate-500 text-sm">
-            Type to search across all systems...
-          </div>
-        </div>
+<!-- SPOTLIGHT -->
+<div id="spotlight" class="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm hidden items-start justify-center pt-32 opacity-0 transition-opacity duration-300">
+  <div class="w-full max-w-2xl transform scale-95 transition-transform duration-300" id="spotlight-content">
+    <div class="glass-cosmic-strong rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+      <div class="flex items-center gap-4 p-4 border-b border-slate-700">
+        <i data-lucide="search" class="w-6 h-6 text-slate-400"></i>
+        <input type="text" id="spotlight-input" placeholder="Search leads, deals, work orders..." class="flex-1 bg-transparent text-lg outline-none text-white placeholder-slate-500 font-space">
+        <kbd class="px-2 py-1 bg-slate-700 rounded text-xs text-slate-400">ESC</kbd>
+      </div>
+      <div id="spotlight-results" class="max-h-96 overflow-y-auto p-2">
+        <div class="p-4 text-center text-slate-500 text-sm">Type to search across all systems...</div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    // Theme Management
-    function toggleTheme() {
-      const body = document.body;
-      const toggle = document.getElementById('themeToggle');
-      const darkIcon = toggle.querySelector('.dark-icon');
-      const lightIcon = toggle.querySelector('.light-icon');
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SB_URL = 'https://szguizvpiiuiyugrjeks.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6Z3VpenZwaWl1aXl1Z3JqZWtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjU4OTIsImV4cCI6MjA3NjkwMTg5Mn0.VyOzV1XfmO0faC5EoqU35s0YquEpJ-cCcsPJhm5nI5Y'
 
-      if (body.classList.contains('dark')) {
-        body.classList.remove('dark');
-        body.classList.add('light');
-        toggle.classList.add('light');
-        darkIcon.classList.add('hidden');
-        lightIcon.classList.remove('hidden');
-        localStorage.setItem('theme', 'light');
-      } else {
-        body.classList.remove('light');
-        body.classList.add('dark');
-        toggle.classList.remove('light');
-        darkIcon.classList.remove('hidden');
-        lightIcon.classList.add('hidden');
-        localStorage.setItem('theme', 'dark');
-      }
+async function sb(schema, table, params = '') {
+  const headers = {
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type': 'application/json',
+    'Accept-Profile': schema,
+    'Content-Profile': schema
+  }
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`${table}:${res.status} ${err}`)
+  }
+  return res.json()
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n) { n = Number(n)||0; return n >= 1000000 ? '$'+(n/1000000).toFixed(1)+'M' : n >= 1000 ? '$'+(n/1000).toFixed(1)+'K' : '$'+n.toFixed(0) }
+function pct(a,b) { return b > 0 ? Math.round(a/b*100)+'%' : '0%' }
+function ago(ts) {
+  if (!ts) return '—'
+  const d = Math.floor((Date.now() - new Date(ts)) / 60000)
+  if (d < 1) return 'just now'
+  if (d < 60) return d+'m ago'
+  if (d < 1440) return Math.floor(d/60)+'h ago'
+  return Math.floor(d/1440)+'d ago'
+}
+function stageBadge(s) {
+  const map = { won:'badge-green', closing:'badge-amber', proposal:'badge-purple', contacted:'badge-blue', new:'badge-gray', lost:'badge-red' }
+  return `<span class="badge ${map[s?.toLowerCase()] || 'badge-gray'}">${s||'—'}</span>`
+}
+function statusBadge(s) {
+  const map = { active:'badge-green', completed:'badge-blue', pending:'badge-amber', cancelled:'badge-red', probation:'badge-amber', connected:'badge-green', qualified:'badge-green', disqualified:'badge-red' }
+  return `<span class="badge ${map[s?.toLowerCase()] || 'badge-gray'}">${s||'—'}</span>`
+}
+function interestBadge(s) {
+  const map = { high:'badge-green', medium:'badge-amber', low:'badge-red' }
+  return `<span class="badge ${map[s?.toLowerCase()] || 'badge-gray'}">${s||'—'}</span>`
+}
+
+// ── SIDEBAR LIVE DATA ────────────────────────────────────────────────────────
+async function loadSidebar() {
+  try {
+    const [pipeline, leads, workOrders, kpis] = await Promise.all([
+      sb('deals', 'pipeline', 'select=id,stage,value&limit=500'),
+      sb('crm', 'leads', 'select=id,status&limit=1000'),
+      sb('deals', 'work_orders', 'select=id,status&limit=500'),
+      sb('analytics', 'steve_kpis_daily', 'select=*&order=kpi_date.desc&limit=1'),
+    ])
+
+    document.getElementById('sb-pipeline-count').textContent = pipeline.length
+    document.getElementById('sb-leads-count').textContent = leads.length
+    document.getElementById('sb-wo-count').textContent = workOrders.length
+    document.getElementById('sb-leads-total').textContent = leads.length
+
+    const won = pipeline.filter(p => p.stage?.toLowerCase() === 'won')
+    const proposals = pipeline.filter(p => p.stage?.toLowerCase() === 'proposal')
+    const closing = pipeline.filter(p => p.stage?.toLowerCase() === 'closing')
+    const total = pipeline.length || 1
+
+    document.getElementById('sb-proposals-pct').textContent = pct(proposals.length, total)
+    document.getElementById('sb-proposals-bar').style.width = pct(proposals.length, total)
+    document.getElementById('sb-closing-pct').textContent = pct(closing.length, total)
+    document.getElementById('sb-closing-bar').style.width = pct(closing.length, total)
+    document.getElementById('sb-won-pct').textContent = pct(won.length, total)
+    document.getElementById('sb-won-bar').style.width = pct(won.length, total)
+    document.getElementById('sb-deals-won').textContent = won.length
+
+    const totalRev = won.reduce((s,p) => s + (Number(p.value)||0), 0)
+    document.getElementById('sb-revenue').textContent = fmt(totalRev)
+
+    const k = kpis[0] || {}
+    const closeRate = k.close_rate ? (Number(k.close_rate)*100).toFixed(1)+'%' : pct(won.length, total)
+    document.getElementById('sb-close-rate').textContent = closeRate
+
+  } catch(e) { console.warn('Sidebar load error:', e) }
+}
+
+async function loadAlerts() {
+  try {
+    const alerts = await sb('analytics', 'ops_alerts', 'select=*&order=created_at.desc&limit=5')
+    const container = document.getElementById('alerts-container')
+    document.getElementById('alert-count').textContent = alerts.length
+    if (!alerts.length) {
+      container.innerHTML = '<div class="p-3 rounded-xl bg-white/5 text-center text-xs text-slate-500">No active alerts</div>'
+      return
     }
+    const colorMap = { critical:'nebula-pink', warning:'nebula-amber', info:'nebula-cyan' }
+    container.innerHTML = alerts.map(a => `
+      <div class="p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-nebula-purple/30">
+        <div class="flex items-start gap-2">
+          <span class="w-2 h-2 bg-${colorMap[a.severity]||'slate-400'} rounded-full mt-1.5 shrink-0"></span>
+          <div><p class="text-xs font-medium">${a.message||'Alert'}</p><p class="text-[10px] text-slate-400 mt-1">${ago(a.created_at)}</p></div>
+        </div>
+      </div>`).join('')
+  } catch(e) {
+    document.getElementById('alerts-container').innerHTML = '<div class="p-3 text-xs text-slate-500 text-center">No alerts data</div>'
+  }
+}
 
-    // Load saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      toggleTheme();
-    }
+// ── WINDOW CONTENT LOADERS ───────────────────────────────────────────────────
 
-    // Starfield Animation
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    let animationId;
+async function loadDashboardContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const [kpis, pipeline, workOrders] = await Promise.all([
+      sb('analytics', 'steve_kpis_daily', 'select=*&order=kpi_date.desc&limit=7'),
+      sb('deals', 'pipeline', 'select=stage,value&limit=500'),
+      sb('deals', 'work_orders', 'select=status,total_amount&limit=500'),
+    ])
+    const k = kpis[0] || {}
+    const won = pipeline.filter(p => p.stage?.toLowerCase() === 'won')
+    const totalRev = won.reduce((s,p) => s+(Number(p.value)||0), 0)
+    const totalWO = workOrders.reduce((s,w) => s+(Number(w.total_amount)||0), 0)
+    el.innerHTML = `
+      <div class="space-y-6">
+        <div class="grid grid-cols-3 gap-4">
+          <div class="stat-card"><div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Pipeline Revenue</div><div class="text-2xl font-bold text-nebula-purple font-space">${fmt(totalRev)}</div><div class="text-xs text-green-400 mt-2">${won.length} deals won</div></div>
+          <div class="stat-card"><div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Work Orders</div><div class="text-2xl font-bold text-nebula-cyan font-space">${workOrders.length}</div><div class="text-xs text-slate-400 mt-2">${fmt(totalWO)} total value</div></div>
+          <div class="stat-card"><div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Close Rate</div><div class="text-2xl font-bold text-nebula-pink font-space">${k.close_rate ? (Number(k.close_rate)*100).toFixed(1)+'%' : pct(won.length, pipeline.length)}</div><div class="text-xs text-slate-400 mt-2">${k.deals_closed||won.length} closed</div></div>
+        </div>
+        <div class="stat-card">
+          <h3 class="font-space font-semibold mb-4 text-sm">KPI Trend — Last 7 Days</h3>
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Contacted</th><th>Qualified</th><th>Proposals</th><th>Deals Closed</th><th>Revenue</th></tr></thead>
+            <tbody>${kpis.map(k => `<tr><td>${k.kpi_date||'—'}</td><td>${k.leads_contacted||0}</td><td>${k.leads_qualified||0}</td><td>${k.proposals_sent||0}</td><td>${k.deals_closed||0}</td><td class="text-green-400 font-mono">${fmt(k.revenue_generated||0)}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+        <div class="grid grid-cols-6 gap-2">
+          ${['new','contacted','proposal','closing','won','lost'].map(stage => {
+            const count = pipeline.filter(p => p.stage?.toLowerCase() === stage).length
+            const colors = { new:'text-slate-300', contacted:'text-blue-400', proposal:'text-nebula-purple', closing:'text-nebula-amber', won:'text-green-400', lost:'text-red-400' }
+            return `<div class="stat-card text-center"><div class="text-lg font-bold font-mono ${colors[stage]||'text-white'}">${count}</div><div class="text-[10px] text-slate-400 mt-1 capitalize">${stage}</div></div>`
+          }).join('')}
+        </div>
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
+async function loadSalesContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    // Using only verified columns from deals.pipeline
+    const pipeline = await sb('deals', 'pipeline',
+      'select=id,name,lead_name,company,stage,value,interest_level,ai_score,assigned_to,next_action,service,source,phone,lead_email,updated_at,outreach_status,touch_count,reply_intent&order=updated_at.desc&limit=100')
 
-    function createStars() {
-      stars = [];
-      const count = Math.floor((canvas.width * canvas.height) / 4000);
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2,
-          speed: Math.random() * 0.5 + 0.1,
-          opacity: Math.random(),
-          twinkle: Math.random() * 0.02
-        });
-      }
-    }
+    const stages = ['new','contacted','proposal','closing','won','lost']
+    const stageColors = { new:'border-slate-600', contacted:'border-blue-500/40', proposal:'border-purple-500/40', closing:'border-amber-500/40', won:'border-green-500/40', lost:'border-red-500/40' }
 
-    function animateStars() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const isDark = document.body.classList.contains('dark');
-      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, ' : 'rgba(139, 92, 246, ';
-
-      stars.forEach(star => {
-        star.opacity += star.twinkle;
-        if (star.opacity > 1 || star.opacity < 0.2) star.twinkle = -star.twinkle;
-
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = (isDark ? 'rgba(255, 255, 255, ' : 'rgba(139, 92, 246, ') + star.opacity + ')';
-        ctx.fill();
-
-        // Move stars slowly
-        star.y += star.speed;
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.random() * canvas.width;
-        }
-      });
-
-      animationId = requestAnimationFrame(animateStars);
-    }
-
-    resizeCanvas();
-    createStars();
-    animateStars();
-
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      createStars();
-    });
-
-    // Window Management
-    const windows = {};
-    let zIndex = 1000;
-    let windowCount = 0;
-
-    const appConfigs = {
-      dashboard: { name: 'Command Dashboard', icon: 'layout-dashboard', color: 'from-nebula-purple to-purple-600', width: 1000, height: 700 },
-      sales: { name: 'Sales War Room', icon: 'trending-up', color: 'from-blue-500 to-cyan-500', width: 900, height: 600 },
-      steve: { name: 'Steve AI Console', icon: 'bot', color: 'from-nebula-purple to-nebula-pink', width: 800, height: 700 },
-      crm: { name: 'Partner CRM', icon: 'users', color: 'from-emerald-500 to-teal-500', width: 900, height: 650 },
-      calls: { name: 'Call Floor', icon: 'phone', color: 'from-rose-500 to-red-500', width: 850, height: 600 },
-      finance: { name: 'Finance Core', icon: 'dollar-sign', color: 'from-amber-500 to-orange-500', width: 900, height: 650 },
-      marketing: { name: 'Marketing Hub', icon: 'megaphone', color: 'from-violet-500 to-purple-500', width: 900, height: 600 },
-      files: { name: 'File Nexus', icon: 'folder-open', color: 'from-slate-500 to-slate-600', width: 800, height: 550 },
-      compose: { name: 'Compose', icon: 'mail', color: 'from-nebula-cyan to-blue-500', width: 600, height: 500 },
-      calendar: { name: 'Mission Schedule', icon: 'calendar', color: 'from-nebula-pink to-rose-500', width: 800, height: 600 },
-      analytics: { name: 'Analytics Core', icon: 'bar-chart-3', color: 'from-green-500 to-emerald-500', width: 900, height: 650 },
-      settings: { name: 'System Settings', icon: 'settings', color: 'from-slate-600 to-slate-700', width: 700, height: 550 }
-    };
-
-    function openWindow(appId) {
-      if (windows[appId]) {
-        focusWindow(appId);
-        return;
-      }
-
-      const config = appConfigs[appId];
-      const windowId = `window-${appId}-${Date.now()}`;
-      const container = document.getElementById('window-container');
-
-      // Calculate centered position with slight offset for multiple windows
-      const offset = windowCount * 30;
-      const left = 50 + offset;
-      const top = 20 + offset;
-
-      const win = document.createElement('div');
-      win.id = windowId;
-      win.className = 'absolute cosmic-window rounded-2xl overflow-hidden flex flex-col pointer-events-auto';
-      win.style.width = config.width + 'px';
-      win.style.height = config.height + 'px';
-      win.style.left = left + 'px';
-      win.style.top = top + 'px';
-      win.style.zIndex = ++zIndex;
-
-      win.innerHTML = `
-        <div class="window-header h-12 glass-cosmic border-b border-slate-700 flex items-center px-4 cursor-move select-none">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${config.color} flex items-center justify-center">
-              <i data-lucide="${config.icon}" class="w-4 h-4 text-white"></i>
-            </div>
-            <span class="font-space font-semibold text-sm">${config.name}</span>
-          </div>
-          <div class="flex-1"></div>
-          <div class="flex items-center gap-1">
-            <button onclick="minimizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <i data-lucide="minus" class="w-4 h-4 text-slate-400"></i>
-            </button>
-            <button onclick="maximizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <i data-lucide="maximize-2" class="w-4 h-4 text-slate-400"></i>
-            </button>
-            <button onclick="closeWindow('${windowId}')" class="p-2 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition-colors">
-              <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
-            </button>
+    el.innerHTML = `
+      <div class="space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-space font-bold text-lg">Live Pipeline — ${pipeline.length} deals</h2>
+          <div class="flex gap-2">
+            <span class="badge badge-green">${pipeline.filter(p=>p.stage?.toLowerCase()==='won').length} Won</span>
+            <span class="badge badge-purple">Live</span>
           </div>
         </div>
-        <div class="flex-1 overflow-auto p-6 bg-transparent">
-          ${getWindowContent(appId)}
+
+        <!-- Stage Summary Tiles -->
+        <div class="grid grid-cols-6 gap-2">
+          ${stages.map(stage => {
+            const deals = pipeline.filter(p => p.stage?.toLowerCase() === stage)
+            const val = deals.reduce((s,d) => s+(Number(d.value)||0), 0)
+            return `<div class="stat-card text-center border ${stageColors[stage]||'border-slate-600/30'}">
+              <div class="text-lg font-bold font-mono text-white">${deals.length}</div>
+              <div class="text-[9px] text-slate-400 mt-0.5 capitalize font-semibold">${stage}</div>
+              <div class="text-[9px] text-nebula-cyan mt-0.5">${fmt(val)}</div>
+            </div>`
+          }).join('')}
         </div>
-      `;
 
-      container.appendChild(win);
-      windows[windowId] = { element: win, minimized: false, maximized: false, appId };
-      windowCount++;
-
-      makeDraggable(win);
-      lucide.createIcons();
-
-      // Animate in
-      win.style.opacity = '0';
-      win.style.transform = 'scale(0.9)';
-      setTimeout(() => {
-        win.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        win.style.opacity = '1';
-        win.style.transform = 'scale(1)';
-      }, 10);
-    }
-
-    function getWindowContent(appId) {
-      const contents = {
-        dashboard: `
-          <div class="space-y-6">
-            <div class="grid grid-cols-3 gap-4">
-              <div class="holo-card rounded-xl p-5">
-                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Total Revenue</div>
-                <div class="text-3xl font-bold text-nebula-purple font-space">$2.4M</div>
-                <div class="text-xs text-green-400 mt-2 flex items-center gap-1">
-                  <i data-lucide="trending-up" class="w-3 h-3"></i> +12.5% this month
-                </div>
+        <!-- Pipeline Kanban (3 cols) -->
+        <div class="grid grid-cols-3 gap-3">
+          ${stages.slice(0,6).map(stage => {
+            const deals = pipeline.filter(p => p.stage?.toLowerCase() === stage)
+            return `<div class="stat-card border ${stageColors[stage]||'border-slate-600/20'} flex flex-col gap-2" style="min-height:160px;max-height:220px;overflow-y:auto">
+              <div class="flex items-center justify-between mb-1 sticky top-0 bg-transparent">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-300 capitalize">${stage}</span>
+                <span class="badge badge-gray text-[9px]">${deals.length}</span>
               </div>
-              <div class="holo-card rounded-xl p-5">
-                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Active Deals</div>
-                <div class="text-3xl font-bold text-nebula-cyan font-space">47</div>
-                <div class="text-xs text-slate-400 mt-2">$890K in pipeline</div>
-              </div>
-              <div class="holo-card rounded-xl p-5">
-                <div class="text-slate-400 text-xs mb-2 uppercase tracking-wider">Conversion</div>
-                <div class="text-3xl font-bold text-nebula-pink font-space">24.8%</div>
-                <div class="text-xs text-green-400 mt-2">+3.2% vs last month</div>
-              </div>
-            </div>
-            <div class="glass-cosmic rounded-xl p-6">
-              <h3 class="font-space font-semibold mb-4">Recent Activity</h3>
-              <div class="space-y-3">
-                ${[1,2,3,4,5].map(i => `
-                  <div class="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center">
-                      <i data-lucide="user" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <div class="flex-1">
-                      <div class="font-medium text-sm">New lead from Campaign ${i}</div>
-                      <div class="text-xs text-slate-400">${i * 5} minutes ago</div>
-                    </div>
-                    <span class="px-2 py-1 bg-nebula-purple/20 text-nebula-purple text-xs rounded-full">New</span>
+              ${deals.length ? deals.slice(0,6).map(d => `
+                <div class="p-2 rounded-lg bg-white/5 border border-white/5 hover:border-nebula-purple/40 transition-colors">
+                  <div class="text-xs font-medium truncate">${d.name||d.lead_name||d.company||'—'}</div>
+                  <div class="flex items-center justify-between mt-1">
+                    <span class="text-[10px] text-nebula-cyan">${fmt(d.value||0)}</span>
+                    ${d.interest_level ? interestBadge(d.interest_level) : ''}
                   </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        `,
-        steve: `
-          <div class="flex flex-col h-full">
-            <div class="flex-1 space-y-4 overflow-y-auto mb-4">
-              <div class="flex gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center shrink-0">
-                  <i data-lucide="bot" class="w-5 h-5 text-white"></i>
-                </div>
-                <div class="glass-cosmic rounded-2xl rounded-tl-none p-4 max-w-[80%]">
-                  <p class="text-sm">Hello! I'm Steve AI, your business intelligence assistant. How can I help you optimize your operations today?</p>
-                </div>
-              </div>
-            </div>
-            <div class="glass-cosmic rounded-xl p-3 flex items-center gap-3">
-              <input type="text" placeholder="Ask Steve anything..." class="flex-1 bg-transparent outline-none text-sm">
-              <button class="p-2 bg-nebula-purple rounded-lg hover:bg-nebula-purple/80 transition-colors">
-                <i data-lucide="send" class="w-4 h-4 text-white"></i>
-              </button>
-            </div>
-          </div>
-        `,
-        sales: `
-          <div class="space-y-6">
-            <div class="flex items-center justify-between">
-              <h2 class="font-space font-bold text-xl">Sales Pipeline</h2>
-              <button class="px-4 py-2 bg-nebula-purple rounded-lg text-sm hover:bg-nebula-purple/80 transition-colors">
-                + New Deal
-              </button>
-            </div>
-            <div class="grid grid-cols-4 gap-4">
-              ${['Prospecting', 'Qualification', 'Proposal', 'Closed'].map((stage, i) => `
-                <div class="glass-cosmic rounded-xl p-4">
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="text-sm font-medium">${stage}</span>
-                    <span class="text-xs text-slate-400">${[12, 8, 5, 3][i]}</span>
-                  </div>
-                  <div class="space-y-2">
-                    ${[1, 2].map(j => `
-                      <div class="p-3 rounded-lg bg-white/5 border border-white/10 hover:border-nebula-purple/50 transition-colors cursor-pointer">
-                        <div class="text-sm font-medium">Deal ${i * 2 + j}</div>
-                        <div class="text-xs text-slate-400 mt-1">$${(i * 2 + j) * 15000}</div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `,
-        crm: `
-          <div class="space-y-4">
-            <div class="flex items-center gap-4">
-              <input type="text" placeholder="Search partners..." class="flex-1 glass-cosmic rounded-xl px-4 py-2 text-sm outline-none focus:border-nebula-purple">
-              <button class="px-4 py-2 bg-nebula-cyan rounded-lg text-sm hover:bg-nebula-cyan/80 transition-colors">
-                + Add Partner
-              </button>
-            </div>
-            <div class="glass-cosmic rounded-xl overflow-hidden">
-              <table class="w-full text-sm">
-                <thead class="bg-white/5">
-                  <tr>
-                    <th class="text-left p-4 text-slate-400 font-medium">Partner</th>
-                    <th class="text-left p-4 text-slate-400 font-medium">Status</th>
-                    <th class="text-left p-4 text-slate-400 font-medium">Revenue</th>
-                    <th class="text-left p-4 text-slate-400 font-medium">Last Contact</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5">
-                  ${['Acme Corp', 'TechStart Inc', 'Global Solutions', 'Innovate LLC'].map((name, i) => `
-                    <tr class="hover:bg-white/5 transition-colors cursor-pointer">
-                      <td class="p-4">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center text-xs font-bold">
-                            ${name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <span class="font-medium">${name}</span>
-                        </div>
-                      </td>
-                      <td class="p-4">
-                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Active</span>
-                      </td>
-                      <td class="p-4 font-mono">$${(i + 1) * 45000}</td>
-                      <td class="p-4 text-slate-400">${i + 1} days ago</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `,
-        settings: `
-          <div class="space-y-6">
-            <h2 class="font-space font-bold text-xl">System Settings</h2>
-            <div class="space-y-4">
-              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
-                <div>
-                  <div class="font-medium">Notifications</div>
-                  <div class="text-xs text-slate-400">Enable desktop alerts</div>
-                </div>
-                <button class="w-12 h-6 bg-nebula-purple rounded-full relative">
-                  <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-                </button>
-              </div>
-              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
-                <div>
-                  <div class="font-medium">Auto-Sync</div>
-                  <div class="text-xs text-slate-400">Sync data every 30 seconds</div>
-                </div>
-                <button class="w-12 h-6 bg-nebula-purple rounded-full relative">
-                  <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-                </button>
-              </div>
-              <div class="glass-cosmic rounded-xl p-4 flex items-center justify-between">
-                <div>
-                  <div class="font-medium">Sound Effects</div>
-                  <div class="text-xs text-slate-400">Play UI sounds</div>
-                </div>
-                <button class="w-12 h-6 bg-slate-700 rounded-full relative">
-                  <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        `
-      };
-      return contents[appId] || `<div class="p-8 text-center text-slate-400">Module "${appId}" loaded successfully.<br>Select an option from the sidebar to begin.</div>`;
-    }
+                  ${d.service ? `<div class="text-[9px] text-slate-500 mt-0.5 truncate">${d.service}</div>` : ''}
+                </div>`).join('') : '<div class="text-[10px] text-slate-600 text-center py-4">Empty</div>'}
+            </div>`
+          }).join('')}
+        </div>
 
-    function closeWindow(windowId) {
-      const win = windows[windowId];
-      if (win) {
-        win.element.style.opacity = '0';
-        win.element.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-          win.element.remove();
-          delete windows[windowId];
-          windowCount--;
-        }, 300);
-      }
-    }
+        <!-- Recent Activity Table -->
+        <div>
+          <h3 class="font-space font-semibold text-sm mb-3">Recent Activity</h3>
+          <table class="data-table">
+            <thead><tr><th>Deal / Lead</th><th>Company</th><th>Stage</th><th>Value</th><th>Interest</th><th>Score</th><th>Assigned</th><th>Updated</th></tr></thead>
+            <tbody>${pipeline.slice(0,15).map(d => `<tr>
+              <td class="font-medium">${d.name||d.lead_name||'—'}</td>
+              <td class="text-slate-400">${d.company||'—'}</td>
+              <td>${stageBadge(d.stage)}</td>
+              <td class="font-mono text-nebula-cyan">${fmt(d.value||0)}</td>
+              <td>${d.interest_level ? interestBadge(d.interest_level) : '<span class="text-slate-600">—</span>'}</td>
+              <td><span class="font-mono text-nebula-amber">${d.ai_score||'—'}</span></td>
+              <td class="text-slate-400">${d.assigned_to||'—'}</td>
+              <td class="text-slate-400">${ago(d.updated_at)}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-    function minimizeWindow(windowId) {
-      const win = windows[windowId];
-      if (win) {
-        win.element.style.transform = 'scale(0)';
-        win.element.style.opacity = '0';
-        win.minimized = true;
-        setTimeout(() => {
-          win.element.style.display = 'none';
-        }, 300);
-      }
-    }
+async function loadSteveContent(el) {
+  const messages = [{ role:'assistant', text:'Hello Commander! I\'m Steve BGE. I have live access to your pipeline, leads, and KPIs. Ask me anything about your business performance.' }]
 
-    function maximizeWindow(windowId) {
-      const win = windows[windowId];
-      if (win) {
-        if (win.maximized) {
-          win.element.style.width = '900px';
-          win.element.style.height = '600px';
-          win.element.style.left = '50px';
-          win.element.style.top = '50px';
-          win.maximized = false;
-        } else {
-          win.element.style.width = '100%';
-          win.element.style.height = '100%';
-          win.element.style.left = '0';
-          win.element.style.top = '0';
-          win.maximized = true;
+  const render = () => {
+    el.innerHTML = `
+      <div class="flex flex-col" style="height:520px">
+        <div class="flex-1 space-y-4 overflow-y-auto mb-4 pr-2" id="steve-messages">
+          ${messages.map(m => m.role === 'assistant'
+            ? `<div class="flex gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-nebula-purple to-nebula-pink flex items-center justify-center shrink-0"><i data-lucide="bot" style="width:20px;height:20px;color:white"></i></div><div class="glass-cosmic rounded-2xl rounded-tl-none p-4 max-w-[85%]"><p class="text-sm leading-relaxed">${m.text}</p></div></div>`
+            : `<div class="flex gap-3 justify-end"><div class="glass-cosmic rounded-2xl rounded-tr-none p-4 max-w-[85%] border border-nebula-purple/20"><p class="text-sm">${m.text}</p></div><div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center shrink-0"><i data-lucide="user" style="width:20px;height:20px;color:#94a3b8"></i></div></div>`
+          ).join('')}
+        </div>
+        <div class="glass-cosmic rounded-xl p-3 flex items-center gap-3 shrink-0">
+          <input type="text" id="steve-input" placeholder="Ask about pipeline, leads, revenue..." class="flex-1 bg-transparent outline-none text-sm placeholder-slate-500">
+          <button id="steve-send" class="p-2 bg-nebula-purple rounded-lg hover:bg-nebula-purple/80 transition-colors shrink-0">
+            <i data-lucide="send" style="width:16px;height:16px;color:white"></i>
+          </button>
+        </div>
+      </div>`
+    lucide.createIcons()
+    const msgEl = document.getElementById('steve-messages')
+    if (msgEl) msgEl.scrollTop = msgEl.scrollHeight
+    document.getElementById('steve-send')?.addEventListener('click', sendSteve)
+    document.getElementById('steve-input')?.addEventListener('keydown', e => { if(e.key==='Enter') sendSteve() })
+  }
+
+  async function sendSteve() {
+    const input = document.getElementById('steve-input')
+    const text = input?.value?.trim()
+    if (!text) return
+    messages.push({ role:'user', text })
+    input.value = ''
+    messages.push({ role:'assistant', text:'<span class="spinner" style="width:16px;height:16px"></span>' })
+    render()
+    try {
+      const [pipeline, leads, kpis] = await Promise.all([
+        sb('deals', 'pipeline', 'select=stage,value,name,interest_level,ai_score&limit=200'),
+        sb('crm', 'leads', 'select=status,lead_score,priority_level&limit=500'),
+        sb('analytics', 'steve_kpis_daily', 'select=*&order=kpi_date.desc&limit=3'),
+      ])
+      const won = pipeline.filter(p=>p.stage?.toLowerCase()==='won')
+      const totalVal = pipeline.reduce((s,p)=>s+(Number(p.value)||0),0)
+      const context = `You are Steve BGE, senior sales AI for Traffik Boosters digital marketing agency. Live data as of now: Pipeline: ${pipeline.length} deals total, ${won.length} won, $${totalVal.toFixed(0)} total pipeline value. Stage breakdown: ${['new','contacted','proposal','closing','won','lost'].map(s=>s+':'+pipeline.filter(p=>p.stage?.toLowerCase()===s).length).join(', ')}. Leads: ${leads.length} total, ${leads.filter(l=>l.status==='qualified').length} qualified, ${leads.filter(l=>l.priority_level==='high').length} high priority. Latest KPI snapshot: ${JSON.stringify(kpis[0]||{})}. Answer concisely in 2-3 sentences. Use dollar signs and percentages where relevant.`
+      let reply = ''
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': '', 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, system: context, messages:[{ role:'user', content: text }] })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          reply = data.content?.[0]?.text || ''
         }
+      } catch(_) {}
+      if (!reply) {
+        // Smart fallback using live data
+        const q = text.toLowerCase()
+        if (q.includes('revenue') || q.includes('money') || q.includes('value')) reply = `Pipeline total value is ${fmt(totalVal)} with ${won.length} won deals generating ${fmt(won.reduce((s,p)=>s+(Number(p.value)||0),0))} in closed revenue.`
+        else if (q.includes('lead')) reply = `You have ${leads.length} leads total — ${leads.filter(l=>l.status==='qualified').length} qualified and ${leads.filter(l=>l.priority_level==='high').length} flagged high priority. Focus on the high-priority ones first.`
+        else if (q.includes('pipeline') || q.includes('deal')) reply = `Pipeline has ${pipeline.length} active deals. Currently ${pipeline.filter(p=>p.stage?.toLowerCase()==='closing').length} in closing, ${pipeline.filter(p=>p.stage?.toLowerCase()==='proposal').length} at proposal stage.`
+        else if (q.includes('close') || q.includes('win')) reply = `Win rate is ${pct(won.length, pipeline.length)} with ${won.length} closed deals worth ${fmt(won.reduce((s,p)=>s+(Number(p.value)||0),0))}.`
+        else reply = `Live snapshot: ${pipeline.length} pipeline deals, ${leads.length} leads, ${won.length} won, ${fmt(totalVal)} in pipeline value. What specific metric would you like me to analyze?`
       }
+      messages[messages.length-1] = { role:'assistant', text: reply }
+    } catch(e) {
+      messages[messages.length-1] = { role:'assistant', text: 'Error loading live data. Please try again.' }
     }
+    render()
+  }
+  render()
+}
 
-    function focusWindow(windowId) {
-      const win = windows[windowId];
-      if (win) {
-        if (win.minimized) {
-          win.element.style.display = 'flex';
-          win.element.style.transform = 'scale(1)';
-          win.element.style.opacity = '1';
-          win.minimized = false;
-        }
-        win.element.style.zIndex = ++zIndex;
-      }
-    }
+async function loadCRMContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const leads = await sb('crm', 'leads',
+      'select=id,name,business_name,industry,status,lead_score,priority_level,intent,assigned_to,last_activity_at,revenue_tier,close_probability&order=lead_score.desc&limit=100')
+    el.innerHTML = `
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-space font-bold text-lg">Lead Intelligence — ${leads.length} leads</h2>
+          <div class="flex gap-2">
+            <span class="badge badge-green">${leads.filter(l=>l.status==='qualified').length} Qualified</span>
+            <span class="badge badge-red">${leads.filter(l=>l.priority_level==='high').length} High Priority</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-3">
+          ${['new','contacted','qualified','disqualified'].map(s => `<div class="stat-card text-center"><div class="text-xl font-bold font-mono text-white">${leads.filter(l=>l.status===s).length}</div><div class="text-[10px] text-slate-400 mt-1 capitalize">${s}</div></div>`).join('')}
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Business</th><th>Industry</th><th>Status</th><th>Score</th><th>Priority</th><th>Close %</th><th>Last Activity</th></tr></thead>
+          <tbody>${leads.map(l => `<tr>
+            <td class="font-medium">${l.name||'—'}</td>
+            <td>${l.business_name||'—'}</td>
+            <td class="text-slate-400">${l.industry||'—'}</td>
+            <td>${statusBadge(l.status)}</td>
+            <td><span class="font-mono text-nebula-cyan">${l.lead_score||'—'}</span></td>
+            <td>${l.priority_level==='high'?'<span class="badge badge-red">High</span>':l.priority_level==='medium'?'<span class="badge badge-amber">Med</span>':'<span class="badge badge-gray">Low</span>'}</td>
+            <td>${l.close_probability ? Math.round(Number(l.close_probability)*100)+'%' : '—'}</td>
+            <td class="text-slate-400">${ago(l.last_activity_at)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-    function makeDraggable(element) {
-      const header = element.querySelector('.window-header');
-      let isDragging = false;
-      let currentX, currentY, initialX, initialY;
+async function loadCallsContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const [calls, queue] = await Promise.all([
+      sb('dialer', 'calls', 'select=*&order=created_at.desc&limit=50'),
+      sb('dialer', 'call_queue', 'select=*&order=priority.desc&limit=20'),
+    ])
+    const active = calls.filter(c => c.call_status === 'active' || c.call_status === 'connected')
+    el.innerHTML = `
+      <div class="space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-space font-bold text-lg">Call Floor</h2>
+          <div class="flex gap-2">
+            <span class="badge ${active.length > 0 ? 'badge-green' : 'badge-gray'}">${active.length} Live</span>
+            <span class="badge badge-blue">${queue.length} Queued</span>
+            <span class="badge badge-purple">${calls.length} Total</span>
+          </div>
+        </div>
+        ${active.length > 0 ? `
+        <div>
+          <h3 class="text-sm font-semibold text-amber-400 mb-3">🔴 Active Calls</h3>
+          <div class="grid grid-cols-2 gap-3">
+            ${active.map(c => `<div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+              <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold text-amber-300">${c.phone_number||c.phone||'—'}</span><span class="badge badge-amber">LIVE</span></div>
+              <div class="text-xs text-slate-400">Sentiment: <span class="text-white">${c.sentiment||'—'}</span></div>
+              ${c.ai_tip ? `<div class="text-xs mt-2 p-2 rounded bg-slate-800 text-emerald-300">💡 ${c.ai_tip}</div>` : ''}
+              ${c.objection ? `<div class="text-xs mt-1 p-2 rounded bg-red-900/30 text-red-300">⚠️ ${c.objection}</div>` : ''}
+            </div>`).join('')}
+          </div>
+        </div>` : '<div class="p-4 rounded-xl border border-slate-700/40 bg-slate-900/40 text-center text-slate-500 text-sm">No active calls right now</div>'}
+        <div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Recent Calls</h3>
+          <table class="data-table">
+            <thead><tr><th>Number</th><th>Status</th><th>Duration</th><th>Sentiment</th><th>Heat Score</th><th>Time</th></tr></thead>
+            <tbody>${calls.slice(0,15).map(c => `<tr>
+              <td class="font-mono">${c.phone_number||c.phone||'—'}</td>
+              <td>${statusBadge(c.call_status||c.status)}</td>
+              <td>${c.duration ? c.duration+'s' : '—'}</td>
+              <td>${c.sentiment||'—'}</td>
+              <td>${c.deal_heat_score ? `<span class="font-mono text-nebula-amber">${c.deal_heat_score}</span>` : '—'}</td>
+              <td class="text-slate-400">${ago(c.created_at)}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+        ${queue.length > 0 ? `<div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Call Queue (${queue.length})</h3>
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Phone</th><th>Priority</th><th>Attempts</th><th>Status</th></tr></thead>
+            <tbody>${queue.map(q => `<tr><td>${q.name||'—'}</td><td class="font-mono">${q.phone||'—'}</td><td>${q.priority||'—'}</td><td>${q.attempts||0}</td><td>${statusBadge(q.status)}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-      header.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        initialX = e.clientX - element.offsetLeft;
-        initialY = e.clientY - element.offsetTop;
-        element.style.zIndex = ++zIndex;
-      });
+async function loadFinanceContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const [workOrders, proposals, revenue] = await Promise.all([
+      sb('deals', 'work_orders', 'select=*&order=created_at.desc&limit=100'),
+      sb('deals', 'proposals', 'select=id,service_type,total_monthly,deposit_amount,status,business_name,created_at,paid_at&order=created_at.desc&limit=50'),
+      sb('analytics', 'daily_revenue', 'select=*&order=date.desc&limit=14'),
+    ])
+    const totalWO = workOrders.reduce((s,w) => s+(Number(w.total_amount)||0), 0)
+    const paidWO = workOrders.filter(w => w.payment_status === 'paid')
+    const totalPaid = paidWO.reduce((s,w) => s+(Number(w.total_amount)||0), 0)
+    const activeWO = workOrders.filter(w => !['completed','cancelled'].includes(w.status?.toLowerCase()))
+    const totalProposalVal = proposals.reduce((s,p) => s+(Number(p.total_monthly)||0), 0)
+    el.innerHTML = `
+      <div class="space-y-5">
+        <h2 class="font-space font-bold text-lg">Finance Core</h2>
+        <div class="grid grid-cols-4 gap-3">
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Total WO Value</div><div class="text-xl font-bold text-nebula-purple font-mono">${fmt(totalWO)}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Collected</div><div class="text-xl font-bold text-green-400 font-mono">${fmt(totalPaid)}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Active Orders</div><div class="text-xl font-bold text-nebula-cyan font-mono">${activeWO.length}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Proposals (${proposals.length})</div><div class="text-xl font-bold text-nebula-amber font-mono">${fmt(totalProposalVal)}/mo</div></div>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Work Orders</h3>
+          <table class="data-table">
+            <thead><tr><th>Client</th><th>Service</th><th>Amount</th><th>Status</th><th>Payment</th><th>Created</th></tr></thead>
+            <tbody>${workOrders.slice(0,15).map(w => `<tr>
+              <td class="font-medium">${w.client_name||w.business_name||'—'}</td>
+              <td>${w.service_type||w.department||'—'}</td>
+              <td class="font-mono text-nebula-cyan">${fmt(w.total_amount||0)}</td>
+              <td>${statusBadge(w.status)}</td>
+              <td>${w.payment_status==='paid'?'<span class="badge badge-green">Paid</span>':w.payment_status==='pending'?'<span class="badge badge-amber">Pending</span>':'<span class="badge badge-gray">—</span>'}</td>
+              <td class="text-slate-400">${ago(w.created_at)}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+        ${revenue.length ? `<div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Daily Revenue — Last 14 Days</h3>
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Revenue</th></tr></thead>
+            <tbody>${revenue.map(r => `<tr><td>${r.date||'—'}</td><td class="font-mono text-green-400">${fmt(r.revenue||0)}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-      document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-        element.style.left = currentX + 'px';
-        element.style.top = currentY + 'px';
-      });
+async function loadMarketingContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const [campaigns, metrics, leads] = await Promise.all([
+      sb('outreach', 'campaigns', 'select=*&order=created_at.desc&limit=20'),
+      sb('analytics', 'lead_metrics_daily', 'select=*&order=date.desc&limit=14'),
+      sb('crm', 'leads', 'select=status,tier,assigned_to,targeting_status&limit=500'),
+    ])
+    const assigned = leads.filter(l => l.assigned_to).length
+    const unassigned = leads.length - assigned
+    el.innerHTML = `
+      <div class="space-y-5">
+        <h2 class="font-space font-bold text-lg">Marketing Hub</h2>
+        <div class="grid grid-cols-4 gap-3">
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Total Leads</div><div class="text-xl font-bold text-nebula-purple font-mono">${leads.length}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Assigned</div><div class="text-xl font-bold text-green-400 font-mono">${assigned}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Unassigned</div><div class="text-xl font-bold ${unassigned > 50 ? 'text-red-400' : 'text-amber-400'} font-mono">${unassigned}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Campaigns</div><div class="text-xl font-bold text-nebula-cyan font-mono">${campaigns.length}</div></div>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Active Campaigns</h3>
+          ${campaigns.length ? `<table class="data-table">
+            <thead><tr><th>Name</th><th>Offer</th><th>Status</th><th>Daily Limit</th><th>Channels</th></tr></thead>
+            <tbody>${campaigns.map(c => `<tr>
+              <td class="font-medium">${c.name||'—'}</td>
+              <td>${c.offer_name||'—'}</td>
+              <td>${statusBadge(c.status)}</td>
+              <td>${c.daily_limit||'—'}</td>
+              <td class="text-slate-400">${Array.isArray(c.channel_mix) ? c.channel_mix.join(', ') : c.channel_mix||'—'}</td>
+            </tr>`).join('')}</tbody>
+          </table>` : '<div class="text-sm text-slate-500 text-center py-4">No campaigns found</div>'}
+        </div>
+        ${metrics.length ? `<div>
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Lead Funnel — Last 14 Days</h3>
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Created</th><th>Contacted</th><th>Calls</th><th>Deals</th><th>CVR</th></tr></thead>
+            <tbody>${metrics.map(m => `<tr>
+              <td>${m.date||'—'}</td>
+              <td>${m.leads_created||0}</td>
+              <td>${m.leads_contacted||0}</td>
+              <td>${m.calls_completed||0}</td>
+              <td>${m.deals_closed||0}</td>
+              <td class="text-nebula-cyan font-mono">${m.conversion_rate ? Number(m.conversion_rate).toFixed(1)+'%' : '—'}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-      });
-    }
+async function loadFilesContent(el) {
+  el.innerHTML = '<div class="flex items-center justify-center h-40"><div class="spinner"></div></div>'
+  try {
+    const workOrders = await sb('deals', 'work_orders', 'select=*&order=created_at.desc&limit=100')
+    const pending = workOrders.filter(w => w.fulfillment_status === 'pending' || w.status === 'pending')
+    const active = workOrders.filter(w => w.status === 'active' || w.execution_status === 'active')
+    const totalVal = workOrders.reduce((s,w)=>s+(Number(w.total_amount)||0),0)
+    el.innerHTML = `
+      <div class="space-y-5">
+        <h2 class="font-space font-bold text-lg">Work Orders — ${workOrders.length} total</h2>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Pending</div><div class="text-xl font-bold text-amber-400 font-mono">${pending.length}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Active</div><div class="text-xl font-bold text-blue-400 font-mono">${active.length}</div></div>
+          <div class="stat-card"><div class="text-xs text-slate-400 mb-1">Total Value</div><div class="text-xl font-bold text-green-400 font-mono">${fmt(totalVal)}</div></div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Client</th><th>Service</th><th>Status</th><th>Fulfillment</th><th>Amount</th><th>Payment</th><th>Created</th></tr></thead>
+          <tbody>${workOrders.map(w => `<tr>
+            <td class="font-medium">${w.client_name||w.business_name||'—'}</td>
+            <td class="text-slate-400">${w.service_type||w.department||'—'}</td>
+            <td>${statusBadge(w.status)}</td>
+            <td>${statusBadge(w.fulfillment_status)}</td>
+            <td class="font-mono text-nebula-cyan">${fmt(w.total_amount||0)}</td>
+            <td>${w.payment_status==='paid'?'<span class="badge badge-green">Paid</span>':'<span class="badge badge-amber">Pending</span>'}</td>
+            <td class="text-slate-400">${ago(w.created_at)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`
+  } catch(e) { el.innerHTML = `<div class="p-8 text-center text-red-400">Error: ${e.message}</div>` }
+}
 
-    // Spotlight Search
-    function toggleSpotlight() {
-      const spotlight = document.getElementById('spotlight');
-      const content = document.getElementById('spotlight-content');
-      const input = document.getElementById('spotlight-input');
+// ── WINDOW MANAGER ───────────────────────────────────────────────────────────
+const windows = {}; let zIndex = 1000; let windowCount = 0
 
-      if (spotlight.classList.contains('hidden')) {
-        spotlight.classList.remove('hidden');
-        spotlight.classList.add('flex');
-        setTimeout(() => {
-          spotlight.style.opacity = '1';
-          content.style.transform = 'scale(1)';
-        }, 10);
-        input.focus();
-      } else {
-        spotlight.style.opacity = '0';
-        content.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          spotlight.classList.add('hidden');
-          spotlight.classList.remove('flex');
-        }, 300);
-      }
-    }
+const appConfigs = {
+  dashboard: { name:'Command Dashboard',  icon:'layout-dashboard', w:980,  h:680 },
+  sales:     { name:'Sales War Room',     icon:'trending-up',      w:1060, h:680 },
+  steve:     { name:'Steve BGE Console',  icon:'bot',              w:760,  h:640 },
+  crm:       { name:'Lead Intelligence',  icon:'users',            w:1040, h:680 },
+  calls:     { name:'Call Floor',         icon:'phone',            w:900,  h:680 },
+  finance:   { name:'Finance Core',       icon:'dollar-sign',      w:980,  h:700 },
+  marketing: { name:'Marketing Hub',      icon:'megaphone',        w:980,  h:680 },
+  files:     { name:'Work Orders',        icon:'folder-open',      w:980,  h:660 },
+}
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const spotlight = document.getElementById('spotlight');
-        if (!spotlight.classList.contains('hidden')) {
-          toggleSpotlight();
-        }
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        toggleSpotlight();
-      }
-    });
+const loaders = {
+  dashboard: loadDashboardContent,
+  sales:     loadSalesContent,
+  steve:     loadSteveContent,
+  crm:       loadCRMContent,
+  calls:     loadCallsContent,
+  finance:   loadFinanceContent,
+  marketing: loadMarketingContent,
+  files:     loadFilesContent
+}
 
-    // Initialize
-    lucide.createIcons();
+function openWindow(appId) {
+  const existing = Object.entries(windows).find(([,w]) => w.appId === appId)
+  if (existing) { focusWindow(existing[0]); return }
+  const config = appConfigs[appId]
+  if (!config) return
+  const windowId = 'win-' + appId + '-' + Date.now()
+  const container = document.getElementById('window-container')
+  const offset = (windowCount % 5) * 28
+  const win = document.createElement('div')
+  win.id = windowId
+  win.className = 'absolute cosmic-window rounded-2xl overflow-hidden flex flex-col pointer-events-auto'
+  win.style.cssText = `width:${config.w}px;height:${config.h}px;left:${40+offset}px;top:${20+offset}px;z-index:${++zIndex}`
+  win.innerHTML = `
+    <div class="window-header h-12 glass-cosmic border-b border-slate-700/60 flex items-center px-4 cursor-move select-none shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><i data-lucide="${config.icon}" style="width:16px;height:16px;color:white"></i></div>
+        <span class="font-space font-semibold text-sm">${config.name}</span>
+        <span class="badge badge-purple text-[9px]">LIVE</span>
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-1">
+        <button onclick="refreshWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg" title="Refresh"><i data-lucide="refresh-cw" style="width:14px;height:14px;color:#94a3b8"></i></button>
+        <button onclick="minimizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="minus" style="width:16px;height:16px;color:#94a3b8"></i></button>
+        <button onclick="maximizeWindow('${windowId}')" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="maximize-2" style="width:16px;height:16px;color:#94a3b8"></i></button>
+        <button onclick="closeWindow('${windowId}')" class="p-2 hover:bg-red-500/20 rounded-lg"><i data-lucide="x" style="width:16px;height:16px;color:#94a3b8"></i></button>
+      </div>
+    </div>
+    <div class="window-content flex-1 overflow-auto p-5" id="content-${windowId}"></div>`
+  container.appendChild(win)
+  windows[windowId] = { element:win, appId, minimized:false, maximized:false }
+  windowCount++
+  makeDraggable(win)
+  lucide.createIcons()
+  const contentEl = document.getElementById('content-' + windowId)
+  if (loaders[appId]) loaders[appId](contentEl)
+  win.style.opacity='0'; win.style.transform='scale(0.92) translateY(10px)'
+  setTimeout(() => { win.style.transition='all 0.25s cubic-bezier(0.4,0,0.2,1)'; win.style.opacity='1'; win.style.transform='scale(1) translateY(0)' }, 10)
+}
 
-    // Update live revenue randomly
-    setInterval(() => {
-      const base = 48.2;
-      const variation = (Math.random() - 0.5) * 2;
-      document.getElementById('live-revenue').textContent = '$' + (base + variation).toFixed(1) + 'K';
-    }, 5000);
- 
+function refreshWindow(windowId) {
+  const win = windows[windowId]
+  if (!win) return
+  const contentEl = document.getElementById('content-' + windowId)
+  if (contentEl && loaders[win.appId]) loaders[win.appId](contentEl)
+}
+
+function closeWindow(windowId) {
+  const win = windows[windowId]
+  if (!win) return
+  win.element.style.opacity='0'; win.element.style.transform='scale(0.9)'
+  setTimeout(() => { win.element.remove(); delete windows[windowId]; windowCount-- }, 250)
+}
+
+function minimizeWindow(windowId) {
+  const win = windows[windowId]
+  if (!win) return
+  win.element.style.transform='scale(0) translateY(50px)'; win.element.style.opacity='0'; win.minimized=true
+  setTimeout(() => { win.element.style.display='none' }, 250)
+}
+
+function maximizeWindow(windowId) {
+  const win = windows[windowId]
+  if (!win) return
+  if (win.maximized) {
+    const c = appConfigs[win.appId]
+    win.element.style.width=c.w+'px'; win.element.style.height=c.h+'px'; win.element.style.left='40px'; win.element.style.top='20px'
+    win.maximized=false
+  } else {
+    win.element.style.width='100%'; win.element.style.height='100%'; win.element.style.left='0'; win.element.style.top='0'
+    win.maximized=true
+  }
+}
+
+function focusWindow(windowId) {
+  const win = windows[windowId]
+  if (!win) return
+  if (win.minimized) {
+    win.element.style.display='flex'; win.element.style.transform='scale(1)'; win.element.style.opacity='1'; win.minimized=false
+  }
+  win.element.style.zIndex = ++zIndex
+}
+
+function makeDraggable(element) {
+  const header = element.querySelector('.window-header')
+  let dragging=false, initX, initY
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return
+    dragging=true; initX=e.clientX-element.offsetLeft; initY=e.clientY-element.offsetTop
+    element.style.zIndex=++zIndex
+  })
+  document.addEventListener('mousemove', e => { if (!dragging) return; element.style.left=(e.clientX-initX)+'px'; element.style.top=(e.clientY-initY)+'px' })
+  document.addEventListener('mouseup', () => { dragging=false })
+}
+
+// ── SPOTLIGHT ────────────────────────────────────────────────────────────────
+function toggleSpotlight() {
+  const el = document.getElementById('spotlight')
+  const content = document.getElementById('spotlight-content')
+  if (el.classList.contains('hidden')) {
+    el.classList.remove('hidden'); el.classList.add('flex')
+    setTimeout(() => { el.style.opacity='1'; content.style.transform='scale(1)' }, 10)
+    document.getElementById('spotlight-input').focus()
+  } else {
+    el.style.opacity='0'; content.style.transform='scale(0.95)'
+    setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex') }, 250)
+  }
+}
+
+document.getElementById('spotlight-input').addEventListener('input', async function() {
+  const q = this.value.trim().toLowerCase()
+  const results = document.getElementById('spotlight-results')
+  if (!q) { results.innerHTML='<div class="p-4 text-center text-slate-500 text-sm">Type to search...</div>'; return }
+  results.innerHTML='<div class="p-4 text-center text-slate-500 text-sm loading-pulse">Searching...</div>'
+  try {
+    const [leads, deals] = await Promise.all([
+      sb('crm', 'leads', `select=id,name,business_name,status,lead_score&or=(name.ilike.*${q}*,business_name.ilike.*${q}*)&limit=5`),
+      sb('deals', 'pipeline', `select=id,name,lead_name,company,stage,value&or=(name.ilike.*${q}*,company.ilike.*${q}*,lead_name.ilike.*${q}*)&limit=5`)
+    ])
+    if (!leads.length && !deals.length) { results.innerHTML='<div class="p-4 text-center text-slate-500 text-sm">No results found</div>'; return }
+    results.innerHTML = [
+      ...leads.map(l => `<div class="p-3 rounded-xl hover:bg-white/5 cursor-pointer flex items-center gap-3" onclick="toggleSpotlight()"><div class="w-8 h-8 rounded-lg bg-nebula-purple/20 flex items-center justify-center"><i data-lucide="user" style="width:14px;height:14px;color:#a78bfa"></i></div><div><div class="text-sm font-medium">${l.name||'—'}</div><div class="text-xs text-slate-400">${l.business_name||'Lead'} · Score: ${l.lead_score||'—'}</div></div></div>`),
+      ...deals.map(d => `<div class="p-3 rounded-xl hover:bg-white/5 cursor-pointer flex items-center gap-3" onclick="openWindow('sales');toggleSpotlight()"><div class="w-8 h-8 rounded-lg bg-nebula-cyan/20 flex items-center justify-center"><i data-lucide="trending-up" style="width:14px;height:14px;color:#06b6d4"></i></div><div><div class="text-sm font-medium">${d.name||d.lead_name||d.company||'Deal'}</div><div class="text-xs text-slate-400">${d.stage||'—'} · $${Number(d.value||0).toLocaleString()}</div></div></div>`)
+    ].join('')
+    lucide.createIcons()
+  } catch(e) { results.innerHTML='<div class="p-4 text-center text-red-400 text-sm">Search error</div>' }
+})
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { const el=document.getElementById('spotlight'); if (!el.classList.contains('hidden')) toggleSpotlight() }
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); toggleSpotlight() }
+})
+
+// ── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const body = document.body
+  const toggle = document.getElementById('themeToggle')
+  if (body.classList.contains('dark')) {
+    body.classList.replace('dark','light'); toggle.classList.add('light')
+    toggle.querySelector('.dark-icon').classList.add('hidden')
+    toggle.querySelector('.light-icon').classList.remove('hidden')
+  } else {
+    body.classList.replace('light','dark'); toggle.classList.remove('light')
+    toggle.querySelector('.dark-icon').classList.remove('hidden')
+    toggle.querySelector('.light-icon').classList.add('hidden')
+  }
+}
+
+// ── STARFIELD ────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('starfield')
+const ctx = canvas.getContext('2d')
+let stars = []
+function resizeCanvas() { canvas.width=window.innerWidth; canvas.height=window.innerHeight }
+function createStars() {
+  stars=[]
+  const count = Math.floor((canvas.width*canvas.height)/4000)
+  for (let i=0;i<count;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*2,speed:Math.random()*0.4+0.1,opacity:Math.random(),twinkle:Math.random()*0.015})
+}
+function animateStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  stars.forEach(s => {
+    s.opacity+=s.twinkle; if(s.opacity>1||s.opacity<0.2) s.twinkle=-s.twinkle
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.size,0,Math.PI*2)
+    ctx.fillStyle='rgba(255,255,255,'+s.opacity+')'; ctx.fill()
+    s.y+=s.speed; if(s.y>canvas.height){s.y=0;s.x=Math.random()*canvas.width}
+  })
+  requestAnimationFrame(animateStars)
+}
+resizeCanvas(); createStars(); animateStars()
+window.addEventListener('resize',()=>{resizeCanvas();createStars()})
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+lucide.createIcons()
+loadSidebar()
+loadAlerts()
+setInterval(() => { loadSidebar(); loadAlerts() }, 60000)
+</script>
+</body>
+</html>
